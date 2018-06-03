@@ -1,6 +1,18 @@
+// Header Section
+// A header section contains source code that must be placed before any ANTLR-generated code in the output parser. 
+// In Java, this can be used to specify a package for the resulting parser, and any imported classes. 
+
 header {
 package edu.mit.compilers.grammar;
 }
+
+// Options Section
+// Rather than have the programmer specify a bunch of command-line arguments to the parser generator, 
+// an options section within the grammar itself serves this purpose. 
+// This solution is preferable because it associates the required options with the grammar rather than ANTLR invocation. 
+// The section is preceded by the options keyword and contains a series of option/value assignments. 
+// An options section may be specified on both a per-file, per-grammar, per-rule, and per-subrule basis.
+// You may also specify an option on an element, such as a token reference.
 
 options
 {
@@ -14,6 +26,20 @@ options
 {
   k = 2;
 }
+
+// Token Section
+// If you need to define an "imaginary" token, one that has no corresponding real input symbol, 
+// use the tokens section to define them.  
+// Imaginary tokens are used often for tree nodes that mark or group a subtree resulting from real input.  
+//     For example, you may decide to have an EXPR node be the root of every expression subtree and 
+//     DECL for declaration subtrees for easy reference during tree walking.  
+//     Because there is no corresponding input symbol for EXPR, you cannot reference it in the grammar to implicitly define it.  
+//     Use the following to define those imaginary tokens.
+//
+//     tokens {
+//         EXPR;
+//         DECL;
+//     }
 
 tokens 
 {
