@@ -70,3 +70,19 @@ Structure of compiler (to lab 3, code generation)
                         -------------------------------------------------------------------------------->| assembly program |<----------------------------
                                                                                                          --------------------
                                                                                                          
+
+Optimization
+    1. local optimization
+        common subexpression elimation (CSE)
+        copy propagation
+        dead code elimation
+        algebra simplication (not a data flow optimization)
+    2. data flow analysis based on Control flow graph
+        reachness
+        availability
+        liveness
+    3. global optimizaiton
+        based on data flow analysis
+        apply the items in local optimization globally after data flow analysis
+        loop optimization
+                                                                                                      
