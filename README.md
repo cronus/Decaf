@@ -77,7 +77,7 @@ Optimization
         copy propagation
         dead code elimation
         algebra simplication (not a data flow optimization)
-    2. data flow analysis based on Control flow graph
+    2. data flow analysis based on Control flow graph                                        ======================>   Unified Framework with data flow iterative algorithm
         reachness
         availability
         liveness
@@ -86,3 +86,41 @@ Optimization
         apply the items in local optimization globally after data flow analysis
         loop optimization
                                                                                                       
+    -----------------------------------------------------------------------------------
+
+    4. Register Allocation
+        webs
+            def-use chains: connect definition to all reachable uses
+            unit of register allocation
+        graph coloring
+            each web is allocated a register
+            if two webs interfere they cannot use the same register
+
+    5. Parallelization
+        Finding FORALL Loops out of FOR loops
+        Dependence analysis
+            if there are no loop carried dependences --> parallelizable
+
+            Method
+                1. Distance Vector Method: the ith loop is parallelizable for all dependence d = [d1, ..., di, ... dn]
+                either
+                    one of d1, ..., di-1 is > 0
+                or
+                    all d1,..., di = 0
+
+                2. Integer Programming Method
+                exist an integer vector T, such that AT <= b where A is an integer matrix and b is an integer vector
+
+    6. Memory Optimization: reduce cache misses
+        Loop Transformation
+        Data Transformation
+            strip-mining
+            permutation
+
+    7. Instructions Scheduling
+        List scheduling
+            1. Rename to avoid antidependences
+            2. Build a dependence graph, topological sort of the DAG
+            3. Assign priorities to each operation
+            4. Iteratively select an operation and schedule it
+            note. use heuristics when necessary
