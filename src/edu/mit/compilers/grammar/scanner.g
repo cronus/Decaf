@@ -16,14 +16,37 @@ package edu.mit.compilers.grammar;
 
 options
 {
+  // Sets the prefix for the token type 
+  // definitions of literals rather than using
+  // the default of "TOKEN_".
   mangleLiteralPrefix = "TK_";
+  // set generated language
   language = "Java";
 }
 
+// The overall structure of a lexer is:
+//     class MyLexer extends lexer;
+//     options {
+//         some options
+//     }
+//     {
+//         lexer class members
+//     }
+//     Lexical rules
+
+// the following line just appear above class def
+// its meaning:
+// Sometimes Java generics just doesn't let you do what you want to
+// and you need to effectively tell the compiler that what you're 
+// doing really will be legal at execution time.
+
+// what is an "unchecked" warning?
+// A warning by which the compiler indicates that it cannot ensure type safety
 {@SuppressWarnings("unchecked")}
 class DecafScanner extends Lexer;
 options
 {
+  // set the lookahead depth
   k = 2;
 }
 
@@ -69,20 +92,53 @@ tokens
   }
 }
 
-LCURLY options { paraphrase = "{"; } : "{";
-RCURLY options { paraphrase = "}"; } : "}";
+// Lexical Rules
+// Rules defined within a lexer grammer must have a name beginning with an
+// uppercase letter.
 
-ID options { paraphrase = "an identifier"; } : 
+LCURLY 
+options { 
+  // paraphrase: an easy way to specify a string to use in place of the token name during error processing
+  paraphrase = "{"; 
+} : 
+  "{";
+
+RCURLY 
+options { 
+  paraphrase = "}"; 
+} : 
+  "}";
+
+ID 
+options { 
+  paraphrase = "an identifier"; 
+} : 
   ('a'..'z' | 'A'..'Z')+;
 
 // Note that here, the {} syntax allows you to literally command the lexer
 // to skip mark this token as skipped, or to advance to the next line
 // by directly adding Java commands.
-WS_ : (' ' | '\n' {newline();}) {_ttype = Token.SKIP; };
-SL_COMMENT : "//" (~'\n')* '\n' {_ttype = Token.SKIP; newline (); };
 
-CHAR : '\'' (ESC|~'\'') '\'';
-STRING : '"' (ESC|~'"')* '"';
+// Each lexer object has a line member that can be incremented by calling
+// newline() 
+WS_ : 
+  (' ' | '\n' {newline();}) 
+  {_ttype = Token.SKIP; };
 
+// use ~ operator to invert a character or set the characters
+SL_COMMENT : 
+  "//" (~'\n')* '\n' 
+  {_ttype = Token.SKIP; newline (); };
+
+// collect all escape seqences in another rule called ESC
+// STRING: '"' (ESC | ~('\\'|'"'))* '"';
+CHAR : 
+  '\'' (ESC|~'\'') '\'';
+STRING : 
+  '"' (ESC|~'"')* '"';
+
+// The protected is an indicator that the rule, ESC, is not a token to be returned to the parser
+// it just means that the nextToken method does not attempt to route recognition flow
+// directly to that rule --ESC must be called from another lexer rule
 protected
 ESC :  '\\' ('n'|'"');
