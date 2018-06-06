@@ -122,7 +122,7 @@ options {
 // Each lexer object has a line member that can be incremented by calling
 // newline() 
 WS_ : 
-  (' ' | '\n' {newline();}) 
+  (' ' | '\n' {newline();} | '\t' | '\r') 
   {_ttype = Token.SKIP; };
 
 // use ~ operator to invert a character or set the characters
@@ -141,4 +141,4 @@ STRING :
 // it just means that the nextToken method does not attempt to route recognition flow
 // directly to that rule --ESC must be called from another lexer rule
 protected
-ESC :  '\\' ('n'|'"');
+ESC :  '\\' ('n'|'"'|'t'|'\\'|'\'');
