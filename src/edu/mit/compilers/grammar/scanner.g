@@ -141,4 +141,10 @@ STRING :
 // it just means that the nextToken method does not attempt to route recognition flow
 // directly to that rule --ESC must be called from another lexer rule
 protected
-ESC :  '\\' ('n'|'"'|'t'|'\\'|'\'');
+ESC :  '\\' 
+       ('n'
+       | '"'
+       | 't'
+       | 'r'
+       | '\\'
+       | '\'');
