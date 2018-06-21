@@ -133,7 +133,12 @@ SL_COMMENT :
 // collect all escape seqences in another rule called ESC
 // STRING: '"' (ESC | ~('\\'|'"'))* '"';
 CHAR : 
-  '\'' (ESC|~'\'') '\'';
+  '\'' (ESC
+       |~('\''
+         |'\n'
+         )
+       ) 
+       '\'';
 STRING : 
   '"' (ESC|~'"')* '"';
 
@@ -147,4 +152,5 @@ ESC :  '\\'
        | 't'
        | 'r'
        | '\\'
-       | '\'');
+       | '\''
+       );
