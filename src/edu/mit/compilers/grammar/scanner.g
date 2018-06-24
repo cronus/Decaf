@@ -133,12 +133,17 @@ SL_COMMENT :
 // collect all escape seqences in another rule called ESC
 // STRING: '"' (ESC | ~('\\'|'"'))* '"';
 CHAR : 
-  '\'' (ESC
-       |~('\''
-         |'\n'
-         )
-       ) 
-       '\'';
+  '\'' 
+  (ESC
+  |~('\'' | '\\' | '\n' | '"' | '\t')
+  //{ 
+  //    if(c == '\n') {
+  //        newline();
+  //    }
+  //}
+  ) 
+  '\'';
+
 STRING : 
   '"' (ESC|~'"')* '"';
 
@@ -146,11 +151,4 @@ STRING :
 // it just means that the nextToken method does not attempt to route recognition flow
 // directly to that rule --ESC must be called from another lexer rule
 protected
-ESC :  '\\' 
-       ('n'
-       | '"'
-       | 't'
-       | 'r'
-       | '\\'
-       | '\''
-       );
+ESC :  '\\' ('n' | '"' | 't' | 'r' | '\\' | '\'');
