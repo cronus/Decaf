@@ -136,11 +136,6 @@ CHAR :
   '\'' 
   (ESC
   |~('\'' | '\\' | '\n' | '"' | '\t')
-  //{ 
-  //    if(c == '\n') {
-  //        newline();
-  //    }
-  //}
   ) 
   '\'';
 
@@ -152,3 +147,6 @@ STRING :
 // directly to that rule --ESC must be called from another lexer rule
 protected
 ESC :  '\\' ('n' | '"' | 't' | 'r' | '\\' | '\'');
+
+INT:
+  "0x" ('0'..'9'|'a'..'f'|'A'..'F')+;

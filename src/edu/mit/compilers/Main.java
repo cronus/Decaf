@@ -37,6 +37,8 @@ class Main {
                case DecafScannerTokenTypes.STRING:
                 type = " SRINGLITERAL";
                 break;
+               case DecafScannerTokenTypes.INT:
+                type = " INTLITERAL";
               }
               outputStream.println(token.getLine() + type + " " + text);
             }
