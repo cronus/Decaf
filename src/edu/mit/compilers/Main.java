@@ -44,8 +44,14 @@ class Main {
           } catch(Exception e) {
             // print the error:
             System.err.println(CLI.infile + " " + e);
-            //System.err.println(e.getClass().getCanonicalName());
-            scanner.consume();
+            //System.err.println(e.getClass().getCanonicalName() + e.getMessage());
+            if (e.getMessage().contains("0xA")) {
+                scanner.consume();
+                scanner.newline();
+            } else {
+                scanner.consume();
+            }
+            //scanner.consume();
           }
         }
       } else if (CLI.target == Action.PARSE ||
