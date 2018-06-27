@@ -48,6 +48,7 @@ options
 {
   // set the lookahead depth
   k = 2;
+  testLiterals = false;
 }
 
 // Token Section
