@@ -77,20 +77,20 @@ options
 
 tokens 
 {
-    KEYWORD_IF       = "if";
-    KEYWORD_ELSE     = "else";
-    KEYWORD_FOR      = "for";
-    KEYWORD_WHILE    = "while";
-    KEYWORD_INT      = "int";
-    KEYWORD_VOID     = "void";
-    KEYWORD_BOOL     = "bool";
-    KEYWORD_IMPORT   = "import";
-    KEYWORD_TRUE     = "true";
-    KEYWORD_FALSE    = "false";
-    KEYWORD_RETURN   = "return";
-    KEYWORD_BREAK    = "break";
-    KEYWORD_CONTINUE = "continue";
-    KEYWORD_LEN      = "len";
+    "if";
+    "else";
+    "for";
+    "while";
+    "int";
+    "void";
+    "bool";
+    "import";
+    "true";
+    "false";
+    "return";
+    "break";
+    "continue";
+    "len";
 }
 
 // Selectively turns on debug tracing mode.
@@ -166,14 +166,14 @@ ML_COMMENT:
 
 // collect all escape seqences in another rule called ESC
 // STRING: '"' (ESC | ~('\\'|'"'))* '"';
-CHAR : 
+CHARLITERAL: 
   '\'' 
   (ESC
   |~('\'' | '\\' | '\n' | '"' | '\t')
   ) 
   '\'';
 
-STRING : 
+STRINGLITERAL: 
   '"' 
   (ESC|~('"' | '\'' | '\\' | '\n'))* 
   '"';
@@ -184,7 +184,7 @@ STRING :
 protected
 ESC :  '\\' ('n' | '"' | 't' | 'r' | '\\' | '\'');
 
-INT:
+INTLITERAL:
   "0x" ('0'..'9'|'a'..'f'|'A'..'F')+
   | ('0'..'9')+;
 
@@ -198,7 +198,7 @@ LT:           "<";
 LE:           "<=";
 GT:           ">";
 GE:           ">=";
-EQUAL:        "==";
+EQ:           "==";
 NEQ:          "!=";
 AND:          "&&";
 OR:           "||";
@@ -218,4 +218,4 @@ MINUS_ASSIGN: "-=";
 MULT_ASSIGN:  "*=";
 DIV_ASSIGN:   "/=";
 MOD_ASSIGN:   "%=";
-
+NOT:          "!";

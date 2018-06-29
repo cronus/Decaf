@@ -60,7 +60,140 @@ options
   }
 }
 
-expr:
-    "if";
+program
+    : ( import_decl )* ( field_decl )* ( method_decl )* EOF;
 
-program: TK_class ID LCURLY RCURLY EOF;
+import_decl
+    : TK_import ID SEMI
+    ;
+
+field_decl
+    : type 
+      ( ID 
+      | ID LBRACK INTLITERAL RBRACK
+      )+
+      COMA SEMI
+    ;
+
+method_decl
+    : (type 
+      | TK_void) 
+      ID LPAREN
+      ( (type ID)+ COMA
+      )?
+      block
+    ;
+
+block
+    : LCURLY ( field_decl )* ( statement )* RCURLY
+    ;
+
+type
+    : TK_int 
+    | TK_bool
+    ;
+
+statement
+    : location assign_expr SEMI
+    | method_call SEMI
+    | TK_if LPAREN expr RPAREN block (TK_else block)?
+    | TK_for LPAREN ID ASSIGN expr SEMI expr SEMI location (compound_assign_op expr | increment) RPAREN block
+    | TK_while LPAREN expr RPAREN block
+    | TK_return (expr)? SEMI
+    | TK_break SEMI
+    | TK_continue SEMI
+    ;
+
+assign_expr
+    : assign_op expr
+    | increment
+    ;
+
+assign_op
+    : ASSIGN
+    | compound_assign_op
+    ;
+
+compound_assign_op
+    : PLUS_ASSIGN
+    | MINUS_ASSIGN
+    ;
+
+increment
+    : INC
+    | DEC
+    ;
+
+method_call
+    : method_name LPAREN (( expr )+ COMA)? RPAREN
+    | method_name LPAREN (( import_arg)+ COMA) RPAREN
+    ;
+
+method_name
+    : ID
+    ;
+
+location
+    : ID
+    | ID LBRACK expr RBRACK
+    ;
+
+expr
+    : location
+    | method_call
+    | literal
+    | TK_len LPAREN ID RPAREN
+    | expr bin_op expr
+    | MINUS expr
+    | NOT expr
+    | LPAREN expr RPAREN
+    | expr QUESTION expr COLON expr
+    ;
+
+import_arg
+    : expr
+    | STRINGLITERAL
+    ;
+
+bin_op
+    : arith_op
+    | rel_op
+    | eq_op
+    | cond_op
+    ;
+
+arith_op
+    : PLUS
+    | MINUS
+    | MULT
+    | DIV
+    | MOD
+    ;
+
+rel_op
+    : LT
+    | GT
+    | LE
+    | GE
+    ;
+
+eq_op
+    : EQ
+    | NEQ
+    ;
+
+cond_op
+    : AND
+    | OR
+    ;
+
+literal
+    : INTLITERAL
+    | CHARLITERAL
+    | bool_literal
+    ;
+
+bool_literal
+    : TK_true
+    | TK_false
+    ;

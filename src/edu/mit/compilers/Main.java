@@ -31,13 +31,13 @@ class Main {
                case DecafScannerTokenTypes.ID:
                 type = " IDENTIFIER";
                 break;
-               case DecafScannerTokenTypes.CHAR:
+               case DecafScannerTokenTypes.CHARLITERAL:
                 type = " CHARLITERAL";
                 break;
-               case DecafScannerTokenTypes.STRING:
+               case DecafScannerTokenTypes.STRINGLITERAL:
                 type = " STRINGLITERAL";
                 break;
-               case DecafScannerTokenTypes.INT:
+               case DecafScannerTokenTypes.INTLITERAL:
                 type = " INTLITERAL";
                 break;
                case DecafScannerTokenTypes.KEYWORD_TRUE:
