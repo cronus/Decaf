@@ -157,7 +157,9 @@ SL_COMMENT :
 
 ML_COMMENT:
   "/*"
-  (~('*'|'\n'))*
+  (
+  '\n' {newline();} 
+  | (~('*' | '\n')))*
   "*/"
   {_ttype = Token.SKIP;};
 
