@@ -35,10 +35,18 @@ class Main {
                 type = " CHARLITERAL";
                 break;
                case DecafScannerTokenTypes.STRING:
-                type = " SRINGLITERAL";
+                type = " STRINGLITERAL";
                 break;
                case DecafScannerTokenTypes.INT:
                 type = " INTLITERAL";
+                break;
+               case DecafScannerTokenTypes.KEYWORD_TRUE:
+               case DecafScannerTokenTypes.KEYWORD_FALSE:
+                 type = " BOOLEANLITERAL";
+                 break;
+               default:
+                type = "";
+                break;
               }
               outputStream.println(token.getLine() + type + " " + text);
             }

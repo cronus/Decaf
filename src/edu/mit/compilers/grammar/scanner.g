@@ -64,10 +64,32 @@ options
 //         EXPR;
 //         DECL;
 //     }
+//
+// You can also define literals in this section and, most importantly, assign to them a valid label as in the following example.
+//
+// tokens {
+//    KEYWORD_VOID="void";
+//    EXPR;
+//    DECL;
+//    INT="int";
+// }
+// Strings defined in this way are treated just as if you had referenced them in the parser.
 
 tokens 
 {
-  "class";
+    KEYWORD_IF       = "if";
+    KEYWORD_ELSE     = "else";
+    KEYWORD_FOR      = "for";
+    KEYWORD_INT      = "int";
+    KEYWORD_VOID     = "void";
+    KEYWORD_BOOL     = "bool";
+    KEYWORD_IMPORT   = "import";
+    KEYWORD_TRUE     = "true";
+    KEYWORD_FALSE    = "false";
+    KEYWORD_RETURN   = "return";
+    KEYWORD_BREAK    = "break";
+    KEYWORD_CONTINUE = "continue";
+    KEYWORD_LEN      = "len";
 }
 
 // Selectively turns on debug tracing mode.
@@ -110,9 +132,11 @@ options {
 } : 
   "}";
 
+
 ID 
 options { 
   paraphrase = "an identifier"; 
+  testLiterals = true;
 } : 
   ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
 
@@ -131,6 +155,12 @@ SL_COMMENT :
   "//" (~'\n')* '\n' 
   {_ttype = Token.SKIP; newline (); };
 
+ML_COMMENT:
+  "/*"
+  (~('*'|'\n'))*
+  "*/"
+  {_ttype = Token.SKIP;};
+
 // collect all escape seqences in another rule called ESC
 // STRING: '"' (ESC | ~('\\'|'"'))* '"';
 CHAR : 
@@ -141,7 +171,9 @@ CHAR :
   '\'';
 
 STRING : 
-  '"' (ESC|~'"')* '"';
+  '"' 
+  (ESC|~('"' | '\'' | '\\' | '\n'))* 
+  '"';
 
 // The protected is an indicator that the rule, ESC, is not a token to be returned to the parser
 // it just means that the nextToken method does not attempt to route recognition flow
@@ -150,4 +182,28 @@ protected
 ESC :  '\\' ('n' | '"' | 't' | 'r' | '\\' | '\'');
 
 INT:
-  "0x" ('0'..'9'|'a'..'f'|'A'..'F')+;
+  "0x" ('0'..'9'|'a'..'f'|'A'..'F')+
+  | ('0'..'9')+;
+
+// operators
+MINUS:  "-";
+PLUS:   "+";
+MULT:   "*";
+LT:     "<";
+LE:     "<=";
+GT:     ">";
+GE:     ">=";
+EQUAL:  "==";
+NEQ:    "!=";
+AND:    "&&";
+OR:     "||";
+INC:    "++";
+DEC:    "--";
+LPAREN: "(";
+RPAREN: ")";
+LBRACK: "[";
+RBRACK: "]";
+SEMI:   ";";
+ASSIGN: "=";
+COMMA:  ",";
+
