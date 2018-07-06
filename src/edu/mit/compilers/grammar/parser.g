@@ -28,11 +28,13 @@ options
   public void reportError (RecognitionException ex) {
     // Print the error via some kind of error reporting mechanism.
     error = true;
+    System.err.println(ex);
   }
   @Override
   public void reportError (String s) {
     // Print the error via some kind of error reporting mechanism.
     error = true;
+    System.err.println(s);
   }
   public boolean getError () {
     return error;

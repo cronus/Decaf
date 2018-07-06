@@ -40,8 +40,8 @@ class Main {
                case DecafScannerTokenTypes.INTLITERAL:
                 type = " INTLITERAL";
                 break;
-               case DecafScannerTokenTypes.KEYWORD_TRUE:
-               case DecafScannerTokenTypes.KEYWORD_FALSE:
+               case DecafScannerTokenTypes.TK_true:
+               case DecafScannerTokenTypes.TK_false:
                  type = " BOOLEANLITERAL";
                  break;
                default:
