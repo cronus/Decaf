@@ -19,3 +19,6 @@
         } finally {
             lock.unlock(); // always executed, even if Exception or Error or se
         }
+
+2. redirect to /dev/null
+     redirect stdout to /dev/null, i.e. discard/silent the output by command

@@ -28,8 +28,7 @@ options
   public void reportError (RecognitionException ex) {
     // Print the error via some kind of error reporting mechanism.
     error = true;
-    System.err.println(ex);
-    System.exit(1);
+    System.err.println("1:"+ex);
   }
   @Override
   public void reportError (String s) {
