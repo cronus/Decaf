@@ -164,15 +164,21 @@ location
     ;
 
 expr
-    : location
-    | method_call
-    | literal
-    | TK_len LPAREN ID RPAREN
+    : location expr1
+    | method_call expr1
+    | literal expr1
+    | TK_len LPAREN ID RPAREN expr1
 //    | expr bin_op expr
-    | MINUS expr
-    | NOT expr
-    | LPAREN expr RPAREN
+    | MINUS expr expr1
+    | NOT expr expr1
+    | LPAREN expr RPAREN expr1
 //    | expr QUESTION expr COLON expr
+    ;
+
+expr1
+    : bin_op expr expr1 
+    | QUESTION expr COLON expr expr1
+    |
     ;
 
 import_arg
