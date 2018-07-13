@@ -20,10 +20,10 @@ Structure of compiler (to lab 3, code generation)
                                                                                                          |
                                                                                                         \|/
                                                                                             ------------------------------                        
-                                                                                            | abstract syntax tree (AST) | <-------------------------------- tranverse ------- semantics analysis 
+                                                                                            | abstract syntax tree (AST) | <----------------------- tranverse ------- semantics analysis 
                                                                                             ------------------------------                                                           |
                                                                                                          |        |                                                                  |
-                                                                                                         |     generate                                                            lookup         
+                                                                                                         |     generate                                                            lookup
                                                                                                          |        |                                  --------------------            |
                                                                                                          |        ---------------------------------->| symbol table(s)  | <-----------
                                                                                                          |                                           --------------------

@@ -29,6 +29,7 @@ options
     // Print the error via some kind of error reporting mechanism.
     error = true;
     System.err.println(ex);
+    System.exit(1);
   }
   @Override
   public void reportError (String s) {
@@ -70,20 +71,36 @@ import_decl
     ;
 
 field_decl
-    : type 
-      ( ID 
-      | ID LBRACK INTLITERAL RBRACK
-      )+
-      COMA SEMI
+    : type field_decl_id_list SEMI;
+
+field_decl_id_list
+    : ID field_decl_id_idx more_field_decl_id_list;
+
+more_field_decl_id_list
+    : COMMA ID field_decl_id_idx more_field_decl_id_list
+    |
+    ;
+
+field_decl_id_idx
+    : LBRACK INTLITERAL RBRACK
+    |
     ;
 
 method_decl
-    : (type 
-      | TK_void) 
-      ID LPAREN
-      ( (type ID)+ COMA
-      )?
-      block
+    : method_decl_type ID LPAREN ( method_decl_args_list )? RPAREN block
+    ;
+
+method_decl_type
+    : type
+    | TK_void
+    ;
+
+method_decl_args_list
+    : type ID more_method_decl_args;
+
+more_method_decl_args
+    : COMMA type ID more_method_decl_args
+    |
     ;
 
 block
@@ -127,8 +144,15 @@ increment
     ;
 
 method_call
-    : method_name LPAREN (( expr )+ COMA)? RPAREN
-    | method_name LPAREN (( import_arg)+ COMA) RPAREN
+    : method_name LPAREN ( method_call_args_list )? RPAREN 
+    ;
+
+method_call_args_list
+    : import_arg more_import_arg;
+
+more_import_arg
+    : COMMA import_arg more_import_arg
+    |
     ;
 
 method_name
@@ -145,11 +169,11 @@ expr
     | method_call
     | literal
     | TK_len LPAREN ID RPAREN
-    | expr bin_op expr
+//    | expr bin_op expr
     | MINUS expr
     | NOT expr
     | LPAREN expr RPAREN
-    | expr QUESTION expr COLON expr
+//    | expr QUESTION expr COLON expr
     ;
 
 import_arg
