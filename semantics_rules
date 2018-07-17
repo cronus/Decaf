@@ -1,0 +1,46 @@
+Semantic Rules
+
+    These rules place additional constraints on the set of valid Decaf programs besides the constraints
+    implied by the grammar. A program that is grammatically well-formed and does not violate any
+    of the following rules is called a legal program. A robust compiler will explicitly check each of
+    these rules, and will generate an error message describing each violation it is able to find. A robust
+    compiler will generate at least one error message for each illegal program, but will generate no
+    errors for a legal program.
+
+        1. No identifier is declared twice in the same scope. This includes import identifiers, which
+           exist in the global scope.
+        2. No identifier is used before it is declared.
+        3. The program contains a definition for a method called main that has no parameters and
+           returns void (note that since execution starts at method main, any methods defined after
+           main will never be executed).
+        4. The hint literali in an array declaration must be greater than 0.
+        5. The number and types of arguments in a method call (non-imports) must be the same as the
+           number and types of the formals, i.e., the signatures must be identical.
+        6. If a method call is used as an expression, the method must return a result.
+        7. String literals and array variables may not be used as arguments to non-import methods.
+           Note: a[5] is not an array variable, it is an array location
+        8. A return statement must not have a return value unless it appears in the body of a method
+           that is declared to return a value.
+        9. The expression in a return statement must have the same type as the declared result type
+           of the enclosing method definition.
+        10. An hidi used as a hlocationi must name a declared local/global variable or formal parameter.
+        11. The identifier in a method statement must be a declared method or import.
+        12. For all locations of the form <id>[<expr>]
+            (a) <id> must be an array variable, and
+            (b) the type of <expr> must be int.
+        13. The argument of the len operator must be an array variable, and it must return an int
+        14. The hexpri in an if or a while statement must have type bool, as well as the second expression
+            of a for statement.
+        15. The first hexpri in a ternary conditional expression (?:) must have type bool. Each alternative
+            in the expr must be of the same type in which it’s context expects the expression to
+            be.
+        16. The operands of the unary minus, harith opis, and hrel opis must have type int.
+        17. The operands of heq opis must have the same type, either int or bool.
+        18. The operands of hcond opis and the operand of logical not (!) must have type bool.
+        19. The <location> and the <expr> in an assignment, hlocationi = hexpri, must have the same type.
+        20. The <location> and the <expr> in an incrementing/decrementing assignment, hlocationi += hexpri
+            and <location> -= <expr>, must be of type int. The same is true of hlocationi for ++ and
+            - - .
+        21. All break and continue statements must be contained within the body of a for or a while.
+        22. All integer literals must be in the range −9223372036854775808 ≤ x ≤ 9223372036854775807
+            (64 bits).

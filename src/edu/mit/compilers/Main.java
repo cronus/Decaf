@@ -74,6 +74,19 @@ class Main {
         if(parser.getError()) {
           System.exit(1);
         }
+      } else if (CLI.target == Action.INTER) {
+          DecafScanner scanner = new DecafScanner(new DataInputStream(inputStream));
+          DecafParser parser = new DecafParser(scanner);
+          parser.setTrace(CLI.debug);
+          parser.program();
+
+          // TODO
+          DecafAST ast = new DecafAST(new );
+          ast.setTrace(CLI.debug);
+      
+      } else if (CLI.target == Action.ASSEMBLY) {
+          System.err.println("code generation not implemented!");
+          System.exit(1);
       }
     } catch(Exception e) {
       // print the error:
