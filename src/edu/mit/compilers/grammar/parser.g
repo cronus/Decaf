@@ -176,8 +176,8 @@ expr
     ;
 
 expr1
-    : bin_op expr expr1 
-    | QUESTION expr COLON expr expr1
+    : ( bin_op )   => bin_op expr expr1 
+    | ( QUESTION ) => QUESTION expr COLON expr expr1
     |
     ;
 
