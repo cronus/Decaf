@@ -21,10 +21,14 @@ tokens
     PROGRAM;
     IMPORT_DECL;
     FIELD_DECL;
+    FIELD_DECL_ID_IDX;
     METHOD_DECL;
     BLOCK;
+    TYPE;
     STATEMENT;
+    ASSIGN_EXPR;
     METHOD_CALL;
+    LOCATION;
 }
 
 // Java glue code that makes error reporting easier.
@@ -98,6 +102,7 @@ more_field_decl_id_list
 
 field_decl_id_idx
     : LBRACK! INTLITERAL RBRACK!
+    {#field_decl_id_idx = #([FIELD_DECL_ID_IDX, "field_decl_id_idx"], #field_decl_id_idx);}
     |
     ;
 
@@ -126,6 +131,7 @@ block
 
 type
     : TK_int 
+    {#type = #([TYPE, "type"], #type);}
     | TK_bool
     ;
 
@@ -135,16 +141,24 @@ statement
     | method_call SEMI!
     {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_if^ LPAREN! expr RPAREN! block (TK_else block)?
+    {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_for^ LPAREN! ID ASSIGN expr SEMI! expr SEMI! location (compound_assign_op expr | increment) RPAREN! block
+    {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_while^ LPAREN! expr RPAREN! block
+    {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_return (expr)? SEMI!
+    {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_break SEMI!
+    {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_continue SEMI!
+    {#statement = #([STATEMENT, "statement"], #statement);}
     ;
 
 assign_expr
     : assign_op expr
+    {#assign_expr = #([ASSIGN_EXPR, "assign_expr"], #assign_expr);}
     | increment
+    {#assign_expr = #([ASSIGN_EXPR, "assign_expr"], #assign_expr);}
     ;
 
 assign_op
@@ -181,7 +195,9 @@ method_name
 
 location
     : ID
+    {#location = #([LOCATION, "location"], #location);}
     | ID LBRACK! expr RBRACK!
+    {#location = #([LOCATION, "location"], #location);}
     ;
 
 expr
