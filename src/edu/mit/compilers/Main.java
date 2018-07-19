@@ -2,6 +2,8 @@ package edu.mit.compilers;
 
 import java.io.*;
 import antlr.Token;
+import antlr.CommonAST;
+import antlr.collections.AST;
 import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
@@ -80,9 +82,20 @@ class Main {
           parser.setTrace(CLI.debug);
           parser.program();
 
+          CommonAST t = (CommonAST)parser.getAST();
+          System.out.println(t.toStringList());
+          //System.out.println(t.getNumberOfChildren());
+          //System.out.println(t.getFirstChild());
+          //t=(CommonAST)t.getFirstChild();
+          //while ( t.getText() != null ) {
+          //    System.out.println(t);
+          //    t=(CommonAST)t.getNextSibling();
+          //}
+
+
           // TODO
-          DecafAST ast = new DecafAST(new );
-          ast.setTrace(CLI.debug);
+          //DecafAST ast = new DecafAST(new );
+          //ast.setTrace(CLI.debug);
       
       } else if (CLI.target == Action.ASSEMBLY) {
           System.err.println("code generation not implemented!");

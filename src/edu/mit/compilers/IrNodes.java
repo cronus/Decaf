@@ -28,9 +28,9 @@ class IrCalloutExpr extends IrCallExpr {
 
 class IrBinopExpr extends IrExpression {
 
-    private final int          operator;
-    private final IrExpression lhs;
-    private final IrExpression rhs;
+    //private final int          operator;
+    //private final IrExpression lhs;
+    //private final IrExpression rhs;
 }
 
 abstract class IrStatement extends Ir {
@@ -39,8 +39,8 @@ abstract class IrStatement extends Ir {
 
 class IrAssignStmt extends IrStatement {
     
-    private final IrLocation   lhs;
-    private final IrExpression rhs;
+    //private final IrLocation   lhs;
+    //private final IrExpression rhs;
 }
 
 class IrPlusAssignStmt extends IrStatement {

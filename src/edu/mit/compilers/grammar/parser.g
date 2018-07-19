@@ -16,6 +16,17 @@ options
   buildAST = true;
 }
 
+tokens
+{
+    PROGRAM;
+    IMPORT_DECL;
+    FIELD_DECL;
+    METHOD_DECL;
+    BLOCK;
+    STATEMENT;
+    METHOD_CALL;
+}
+
 // Java glue code that makes error reporting easier.
 // You can insert arbitrary Java code into your parser/lexer this way.
 {
@@ -63,14 +74,19 @@ options
 }
 
 program
-    : ( import_decl )* ( field_decl )* ( method_decl )* EOF;
+    : ( import_decl )* ( field_decl )* ( method_decl )* EOF
+    {#program = #([PROGRAM, "program"], #program);}
+    ;
 
 import_decl
-    : TK_import ID SEMI
+    : TK_import ID SEMI!
+    {#import_decl = #([IMPORT_DECL, "import_decl"], #import_decl);}
     ;
 
 field_decl
-    : type field_decl_id_list SEMI;
+    : type field_decl_id_list SEMI!
+    {#field_decl = #([FIELD_DECL, "field_decl"], #field_decl);}
+    ;
 
 field_decl_id_list
     : ID field_decl_id_idx more_field_decl_id_list;
@@ -81,12 +97,13 @@ more_field_decl_id_list
     ;
 
 field_decl_id_idx
-    : LBRACK INTLITERAL RBRACK
+    : LBRACK! INTLITERAL RBRACK!
     |
     ;
 
 method_decl
-    : method_decl_type ID LPAREN ( method_decl_args_list )? RPAREN block
+    : method_decl_type ID LPAREN! ( method_decl_args_list )? RPAREN! block
+    {#method_decl = #([METHOD_DECL, "method_decl"], #method_decl);}
     ;
 
 method_decl_type
@@ -103,7 +120,8 @@ more_method_decl_args
     ;
 
 block
-    : LCURLY ( field_decl )* ( statement )* RCURLY
+    : LCURLY! ( field_decl )* ( statement )* RCURLY!
+    {#block = #([BLOCK, "block"], #block);}
     ;
 
 type
@@ -112,14 +130,16 @@ type
     ;
 
 statement
-    : location assign_expr SEMI
-    | method_call SEMI
-    | TK_if LPAREN expr RPAREN block (TK_else block)?
-    | TK_for LPAREN ID ASSIGN expr SEMI expr SEMI location (compound_assign_op expr | increment) RPAREN block
-    | TK_while LPAREN expr RPAREN block
-    | TK_return (expr)? SEMI
-    | TK_break SEMI
-    | TK_continue SEMI
+    : location assign_expr SEMI!
+    {#statement = #([STATEMENT, "statement"], #statement);}
+    | method_call SEMI!
+    {#statement = #([STATEMENT, "statement"], #statement);}
+    | TK_if^ LPAREN! expr RPAREN! block (TK_else block)?
+    | TK_for^ LPAREN! ID ASSIGN expr SEMI! expr SEMI! location (compound_assign_op expr | increment) RPAREN! block
+    | TK_while^ LPAREN! expr RPAREN! block
+    | TK_return (expr)? SEMI!
+    | TK_break SEMI!
+    | TK_continue SEMI!
     ;
 
 assign_expr
@@ -143,7 +163,8 @@ increment
     ;
 
 method_call
-    : method_name LPAREN ( method_call_args_list )? RPAREN 
+    : method_name LPAREN! ( method_call_args_list )? RPAREN! 
+    {#method_call = #([METHOD_CALL, "method_call"], #method_call);}
     ;
 
 method_call_args_list
@@ -160,18 +181,18 @@ method_name
 
 location
     : ID
-    | ID LBRACK expr RBRACK
+    | ID LBRACK! expr RBRACK!
     ;
 
 expr
     : location expr1
     | method_call expr1
     | literal expr1
-    | TK_len LPAREN ID RPAREN expr1
+    | TK_len LPAREN! ID RPAREN! expr1
 //    | expr bin_op expr
     | MINUS expr expr1
     | NOT expr expr1
-    | LPAREN expr RPAREN expr1
+    | LPAREN! expr RPAREN! expr1
 //    | expr QUESTION expr COLON expr
     ;
 
