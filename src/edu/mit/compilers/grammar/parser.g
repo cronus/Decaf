@@ -21,14 +21,26 @@ tokens
     PROGRAM;
     IMPORT_DECL;
     FIELD_DECL;
-    FIELD_DECL_ID_IDX;
     METHOD_DECL;
-    BLOCK;
     TYPE;
+    BLOCK;
     STATEMENT;
-    ASSIGN_EXPR;
-    METHOD_CALL;
+    EXPR;
     LOCATION;
+    ASSIGN_EXPR;
+    ASSIGN_OP;
+    COMPOUND_ASSIGN_OP;
+    INCREMENT;
+    METHOD_CALL;
+    METHOD_NAME;
+    IMPORT_ARG;
+    BIN_OP;
+    ARITH_OP;
+    REL_OP;
+    EQ_OP;
+    COND_OP;
+    LITERAL;
+    BOOL_LITERAL;
 }
 
 // Java glue code that makes error reporting easier.
@@ -96,13 +108,12 @@ field_decl_id_list
     : ID field_decl_id_idx more_field_decl_id_list;
 
 more_field_decl_id_list
-    : COMMA ID field_decl_id_idx more_field_decl_id_list
+    : COMMA! ID field_decl_id_idx more_field_decl_id_list
     |
     ;
 
 field_decl_id_idx
     : LBRACK! INTLITERAL RBRACK!
-    {#field_decl_id_idx = #([FIELD_DECL_ID_IDX, "field_decl_id_idx"], #field_decl_id_idx);}
     |
     ;
 
@@ -120,7 +131,7 @@ method_decl_args_list
     : type ID more_method_decl_args;
 
 more_method_decl_args
-    : COMMA type ID more_method_decl_args
+    : COMMA! type ID more_method_decl_args
     |
     ;
 
@@ -140,11 +151,11 @@ statement
     {#statement = #([STATEMENT, "statement"], #statement);}
     | method_call SEMI!
     {#statement = #([STATEMENT, "statement"], #statement);}
-    | TK_if^ LPAREN! expr RPAREN! block (TK_else block)?
+    | TK_if LPAREN! expr RPAREN! block (TK_else block)?
     {#statement = #([STATEMENT, "statement"], #statement);}
-    | TK_for^ LPAREN! ID ASSIGN expr SEMI! expr SEMI! location (compound_assign_op expr | increment) RPAREN! block
+    | TK_for LPAREN! ID ASSIGN expr SEMI! expr SEMI! location (compound_assign_op expr | increment) RPAREN! block
     {#statement = #([STATEMENT, "statement"], #statement);}
-    | TK_while^ LPAREN! expr RPAREN! block
+    | TK_while LPAREN! expr RPAREN! block
     {#statement = #([STATEMENT, "statement"], #statement);}
     | TK_return (expr)? SEMI!
     {#statement = #([STATEMENT, "statement"], #statement);}
@@ -163,17 +174,23 @@ assign_expr
 
 assign_op
     : ASSIGN
+    {#assign_op = #([ASSIGN_OP, "assign_op"], #assign_op);}
     | compound_assign_op
+    {#assign_op = #([ASSIGN_OP, "assign_op"], #assign_op);}
     ;
 
 compound_assign_op
     : PLUS_ASSIGN
+    {#compound_assign_op = #([COMPOUND_ASSIGN_OP, "compound_assign_op"], #compound_assign_op);}
     | MINUS_ASSIGN
+    {#compound_assign_op = #([COMPOUND_ASSIGN_OP, "compound_assign_op"], #compound_assign_op);}
     ;
 
 increment
     : INC
+    {#increment = #([INCREMENT, "increment"], #increment);}
     | DEC
+    {#increment = #([INCREMENT, "increment"], #increment);}
     ;
 
 method_call
@@ -185,12 +202,13 @@ method_call_args_list
     : import_arg more_import_arg;
 
 more_import_arg
-    : COMMA import_arg more_import_arg
+    : COMMA! import_arg more_import_arg
     |
     ;
 
 method_name
     : ID
+    {#method_name = #([METHOD_NAME, "method_name"], #method_name);}
     ;
 
 location
@@ -202,13 +220,20 @@ location
 
 expr
     : location expr1
+    {#expr = #([EXPR, "expr"], #expr);}
     | method_call expr1
+    {#expr = #([EXPR, "expr"], #expr);}
     | literal expr1
+    {#expr = #([EXPR, "expr"], #expr);}
     | TK_len LPAREN! ID RPAREN! expr1
+    {#expr = #([EXPR, "expr"], #expr);}
 //    | expr bin_op expr
     | MINUS expr expr1
+    {#expr = #([EXPR, "expr"], #expr);}
     | NOT expr expr1
+    {#expr = #([EXPR, "expr"], #expr);}
     | LPAREN! expr RPAREN! expr1
+    {#expr = #([EXPR, "expr"], #expr);}
 //    | expr QUESTION expr COLON expr
     ;
 
@@ -220,48 +245,72 @@ expr1
 
 import_arg
     : expr
+    {#import_arg = #([IMPORT_ARG, "import_arg"], #import_arg);}
     | STRINGLITERAL
+    {#import_arg = #([IMPORT_ARG, "import_arg"], #import_arg);}
     ;
 
 bin_op
     : arith_op
+    {#bin_op = #([BIN_OP, "bin_op"], #bin_op);}
     | rel_op
+    {#bin_op = #([BIN_OP, "bin_op"], #bin_op);}
     | eq_op
+    {#bin_op = #([BIN_OP, "bin_op"], #bin_op);}
     | cond_op
+    {#bin_op = #([BIN_OP, "bin_op"], #bin_op);}
     ;
 
 arith_op
     : PLUS
+    {#arith_op = #([ARITH_OP, "arith_op"], #arith_op);}
     | MINUS
+    {#arith_op = #([ARITH_OP, "arith_op"], #arith_op);}
     | MULT
+    {#arith_op = #([ARITH_OP, "arith_op"], #arith_op);}
     | DIV
+    {#arith_op = #([ARITH_OP, "arith_op"], #arith_op);}
     | MOD
+    {#arith_op = #([ARITH_OP, "arith_op"], #arith_op);}
     ;
 
 rel_op
     : LT
+    {#rel_op = #([REL_OP, "rel_op"], #rel_op);}
     | GT
+    {#rel_op = #([REL_OP, "rel_op"], #rel_op);}
     | LE
+    {#rel_op = #([REL_OP, "rel_op"], #rel_op);}
     | GE
+    {#rel_op = #([REL_OP, "rel_op"], #rel_op);}
     ;
 
 eq_op
     : EQ
+    {#eq_op = #([EQ_OP, "eq_op"], #eq_op);}
     | NEQ
+    {#eq_op = #([EQ_OP, "eq_op"], #eq_op);}
     ;
 
 cond_op
     : AND
+    {#cond_op = #([COND_OP, "cond_op"], #cond_op);}
     | OR
+    {#cond_op = #([COND_OP, "cond_op"], #cond_op);}
     ;
 
 literal
     : INTLITERAL
+    {#literal = #([LITERAL, "literal"], #literal);}
     | CHARLITERAL
+    {#literal = #([LITERAL, "literal"], #literal);}
     | bool_literal
+    {#literal = #([LITERAL, "literal"], #literal);}
     ;
 
 bool_literal
     : TK_true
+    {#bool_literal = #([BOOL_LITERAL, "bool_literal"], #bool_literal);}
     | TK_false
+    {#bool_literal = #([BOOL_LITERAL, "bool_literal"], #bool_literal);}
     ;

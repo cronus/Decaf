@@ -7,10 +7,12 @@ Java Skeleton Code for 6.035
 Structure of compiler (to lab 3, code generation)
 
 ---------------                                  ----------                                        --------------
-| source code | ------- lexer analysis --------> | tokens | -------- syntatic analysis ----------->| parse tree |    
+| source code | ------- lexer analysis --------> | tokens | -------- syntatic analysis ----------->| parse tree |                     Using ANTLR   
 ---------------                                  ----------                                        --------------
                                                                                                          |
-                                                                                                         |  -------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                                         |                            
+                                                                                                         |  -------------------       Hand Coded
                                                                                                          |  | semantic action |
                                                                                                          |  -------------------
                                                                                                          |  /     
