@@ -3,6 +3,7 @@ package edu.mit.compilers;
 import java.io.*;
 import antlr.Token;
 import antlr.CommonAST;
+import antlr.collections.AST;
 import edu.mit.compilers.grammar.*;
 import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
@@ -24,13 +25,33 @@ class ConcreteTreeParser {
         this.debug = debug;
     }
 
-    public void traceIn(CommonAST parseTree) {
+    public void traceIn(AST cstNode) {
+        if (!this.debug) {
+            return;
+        }
+        
+        System.out.println(cstNode.getText());
+        
+    }
+
+    public void traceOut(ASTNode astNode) {
         if (!this.debug) {
             return;
         }
     }
+
+    public void reportError() {
+    }
     
     ASTNode program() {
+        if (parseTree.getFirstChild() == null) {
+            System.out.println("no child");
+            return null;
+        }
+
+        // debug
+        traceIn(parseTree);
+
         return null;
     }
 

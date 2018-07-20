@@ -79,7 +79,7 @@ class Main {
       } else if (CLI.target == Action.INTER) {
           DecafScanner scanner = new DecafScanner(new DataInputStream(inputStream));
           DecafParser parser = new DecafParser(scanner);
-          parser.setTrace(CLI.debug);
+          //parser.setTrace(CLI.debug);
           parser.program();
 
           CommonAST t = (CommonAST)parser.getAST();
@@ -94,6 +94,7 @@ class Main {
 
           ConcreteTreeParser cTreeParser = new ConcreteTreeParser(t);
           cTreeParser.setTrace(CLI.debug);
+          cTreeParser.program();
       
       } else if (CLI.target == Action.ASSEMBLY) {
           System.err.println("code generation not implemented!");
