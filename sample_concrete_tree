@@ -1,0 +1,132 @@
+( program 
+    ( import_decl import random ) 
+    ( import_decl import srandom ) 
+    ( import_decl import printf ) 
+    ( field_decl ( type int ) A 100 ) 
+    ( field_decl ( type int ) length ) 
+    ( method_decl 
+        ( type int ) 
+        partition 
+        ( type int ) 
+        p 
+        ( type int ) 
+        r 
+        ( block 
+            ( field_decl ( type int ) x i j t ) 
+            ( field_decl ( type int ) z ) 
+            ( statement ( location x ) ( assign_expr ( assign_op = ) ( expr ( location A ( expr ( location p ) ) ) ) ) ) 
+            ( statement ( location i ) ( assign_expr ( assign_op = ) ( expr ( location p ) ( bin_op ( arith_op - ) ) ( expr ( literal 1 ) ) ) ) ) 
+            ( statement ( location j ) ( assign_expr ( assign_op = ) ( expr ( location r ) ( bin_op ( arith_op + ) ) ( expr ( literal 1 ) ) ) ) ) 
+            ( statement 
+                for 
+                z 
+                = 
+                ( expr ( literal 0 ) ) 
+                ( expr ( location z ) ( bin_op ( rel_op < ) ) ( expr ( location length ) ( bin_op ( arith_op * ) ) ( expr ( location length ) ) ) ) 
+                ( location z ) 
+                ( compound_assign_op += ) 
+                ( expr ( literal 1 ) ) 
+                ( block 
+                    ( field_decl ( type int ) a ) 
+                    ( statement ( location j ) ( assign_expr ( assign_op = ) ( expr ( location j ) ( bin_op ( arith_op - ) ) ( expr ( literal 1 ) ) ) ) ) 
+                    ( statement for a = ( expr ( literal 0 ) ) ( expr ( location a ) ( bin_op ( rel_op < ) ) ( expr ( location length ) ) ) ( location a ) ( compound_assign_op += ) ( expr ( literal 1 ) ) ( block ( statement if ( expr ( location A ( expr ( location j ) ) ) ( bin_op ( rel_op <= ) ) ( expr ( location x ) ) ) ( block ( statement break ) ) ) ( statement ( location j ) ( assign_expr ( assign_op = ) ( expr ( location j ) ( bin_op ( arith_op - ) ) ( expr ( literal 1 ) ) ) ) ) ) ) 
+                    ( statement for a = ( expr ( location i ) ( bin_op ( arith_op + ) ) ( expr ( literal 1 ) ) ) ( expr ( location a ) ( bin_op ( rel_op < ) ) ( expr ( location length ) ) ) ( location a ) ( increment ++ ) ( block ( statement if ( expr ( location A ( expr ( location a ) ) ) ( bin_op ( rel_op >= ) ) ( expr ( location x ) ) ) ( block ( statement ( location i ) ( assign_expr ( assign_op = ) ( expr ( location a ) ) ) ) ( statement break ) ) ) ) ) 
+                    ( statement 
+                        if 
+                        ( expr ( location i ) ( bin_op ( rel_op < ) ) ( expr ( location j ) ) ) 
+                        ( block 
+                            ( statement ( location t ) ( assign_expr ( assign_op = ) ( expr ( location A ( expr ( location i ) ) ) ) ) ) 
+                            ( statement ( location A ( expr ( location i ) ) ) ( assign_expr ( assign_op = ) ( expr ( location A ( expr ( location j ) ) ) ) ) ) 
+                            ( statement ( location A ( expr ( location j ) ) ) ( assign_expr ( assign_op = ) ( expr ( location t ) ) ) ) 
+                        ) 
+                        else 
+                        ( block ( statement return ( expr ( location j ) ) ) ) 
+                    ) 
+                ) 
+            ) 
+            ( statement return ( expr - ( expr ( literal 1 ) ) ) ) 
+        ) 
+    ) 
+    ( method_decl 
+        void 
+        quicksort 
+        ( type int ) 
+        p 
+        ( type int ) 
+        r 
+        ( block 
+            ( field_decl ( type int ) q ) 
+            ( statement 
+                if 
+                ( expr ( location p ) ( bin_op ( rel_op < ) ) ( expr ( location r ) ) ) 
+                ( block 
+                    ( statement 
+                        ( location q ) 
+                        ( assign_expr ( assign_op = ) ( expr ( method_call ( method_name partition ) ( import_arg ( expr ( location p ) ) ) ( import_arg ( expr ( location r ) ) ) ) ) ) 
+                    ) 
+                    ( statement ( method_call ( method_name quicksort ) ( import_arg ( expr ( location p ) ) ) ( import_arg ( expr ( location q ) ) ) ) ) 
+                    ( statement 
+                        ( method_call 
+                            ( method_name quicksort ) 
+                            ( import_arg ( expr ( location q ) ( bin_op ( arith_op + ) ) ( expr ( literal 1 ) ) ) ) 
+                            ( import_arg ( expr ( location r ) ) ) 
+                        ) 
+                    ) 
+                ) 
+            ) 
+        ) 
+    ) 
+    ( method_decl 
+        void 
+        main 
+        ( block 
+            ( field_decl ( type int ) temp i ) 
+            ( statement ( location length ) ( assign_expr ( assign_op = ) ( expr ( literal 10 ) ) ) ) 
+            ( statement ( method_call ( method_name printf ) ( import_arg "creating random array of %d elements\n" ) ( import_arg ( expr ( location length ) ) ) ) ) 
+            ( statement ( method_call ( method_name srandom ) ( import_arg ( expr ( literal 17 ) ) ) ) ) 
+            ( statement 
+                for 
+                i 
+                = 
+                ( expr ( literal 0 ) ) 
+                ( expr ( location i ) ( bin_op ( rel_op < ) ) ( expr ( location length ) ) ) 
+                ( location i ) 
+                ( compound_assign_op += ) 
+                ( expr ( literal 1 ) ) 
+                ( block 
+                    ( statement ( location temp ) ( assign_expr ( assign_op = ) ( expr ( method_call ( method_name random ) ) ) ) ) 
+                    ( statement ( location A ( expr ( location i ) ) ) ( assign_expr ( assign_op = ) ( expr ( location temp ) ) ) ) 
+                ) 
+            ) 
+            ( statement ( method_call ( method_name printf ) ( import_arg "\nbefore sort:\n" ) ) ) 
+            ( statement 
+                for 
+                i 
+                = 
+                ( expr ( literal 0 ) ) 
+                ( expr ( location i ) ( bin_op ( rel_op < ) ) ( expr ( location length ) ) ) 
+                ( location i ) 
+                ( increment ++ ) 
+                ( block ( statement ( method_call ( method_name printf ) ( import_arg "%d\n" ) ( import_arg ( expr ( location A ( expr ( location i ) ) ) ) ) ) ) ) 
+            ) 
+            ( statement 
+                ( method_call 
+                    ( method_name quicksort ) 
+                    ( import_arg ( expr ( literal 0 ) ) ) 
+                    ( import_arg ( expr ( location length ) ( bin_op ( arith_op - ) ) ( expr ( literal 1 ) ) ) ) 
+                )
+            ) 
+            ( statement ( method_call ( method_name printf ) ( import_arg "\nafter sort\n" ) ) ) 
+            ( statement 
+                for 
+                i 
+                = 
+                ( expr ( literal 0 ) ) 
+                ( expr ( location i ) ( bin_op ( rel_op < ) ) ( expr ( location length ) ) ) 
+                ( location i ) 
+                ( compound_assign_op += ) 
+                ( expr ( literal 1 ) ) 
+                ( block ( statement ( method_call ( method_name printf ) ( import_arg "%d\n" ) ( import_arg ( expr ( location A ( expr ( location i ) ) ) ) ) ) ) ) 
+            ) 
+        ) 
+    ) null )

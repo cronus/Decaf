@@ -83,7 +83,7 @@ class Main {
           parser.program();
 
           CommonAST t = (CommonAST)parser.getAST();
-          System.out.println(t.toStringList());
+          //System.out.println(t.toStringList());
           //System.out.println(t.getNumberOfChildren());
           //System.out.println(t.getFirstChild());
           //t=(CommonAST)t.getFirstChild();
@@ -92,10 +92,8 @@ class Main {
           //    t=(CommonAST)t.getNextSibling();
           //}
 
-
-          // TODO
-          //DecafAST ast = new DecafAST(new );
-          //ast.setTrace(CLI.debug);
+          ConcreteTreeParser cTreeParser = new ConcreteTreeParser(t);
+          cTreeParser.setTrace(CLI.debug);
       
       } else if (CLI.target == Action.ASSEMBLY) {
           System.err.println("code generation not implemented!");
