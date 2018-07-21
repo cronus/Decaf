@@ -9,15 +9,18 @@ import edu.mit.compilers.tools.CLI;
 import edu.mit.compilers.tools.CLI.Action;
 
 
-class ConcreteTreeParser {
+class ConcreteTreeParser implements DecafParserTokenTypes {
 
     private CommonAST parseTree;
 
     private boolean debug;
 
+    private int traceDepth;
+
     public ConcreteTreeParser(CommonAST parseTree) {
-        this.parseTree = parseTree;
-        this.debug = false;
+        this.parseTree  = parseTree;
+        this.debug      = false;
+        this.traceDepth = 0;
     }
 
 
@@ -26,16 +29,20 @@ class ConcreteTreeParser {
     }
 
     public void traceIn(AST cstNode) {
-        if (!this.debug) {
+        if(!this.debug) {
             return;
         }
-        
+        for(int i = 0; i < traceDepth; i ++) {
+            System.out.printf("\t");
+        }
         System.out.println(cstNode.getText());
-        
+
+        traceDepth += 1;
     }
 
     public void traceOut(ASTNode astNode) {
-        if (!this.debug) {
+        traceDepth -= 1;
+        if(!this.debug) {
             return;
         }
     }
@@ -44,103 +51,537 @@ class ConcreteTreeParser {
     }
     
     ASTNode program() {
-        if (parseTree.getFirstChild() == null) {
+        if(parseTree.getFirstChild() == null) {
             System.out.println("no child");
             return null;
         }
-
         // debug
         traceIn(parseTree);
 
-        return null;
+        ASTNode n = null;
+        AST child = parseTree.getFirstChild();
+
+        //System.out.println(parseTree.getNumberOfChildren());
+        while(child.getText() != null) {
+            switch(child.getType()) {
+                case IMPORT_DECL: 
+                    importDecl(child);
+                    break;
+                case FIELD_DECL:
+                    fieldDecl(child);
+                    break;
+                case METHOD_DECL:
+                    methodDecl(child);
+                    break;
+            }
+            child = child.getNextSibling();
+        }
+
+        traceOut(n); 
+        return n;
     }
 
-    ASTNode importDecl() {
-        return null;
+    ASTNode importDecl(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = new ImportDeclNode();
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            //System.out.println(childNode.getType()); 
+            //switch(childNode.getType()) {
+            //    case TK_import:
+            //        break;
+            //    case ID:
+            //        id(childNode);
+            //        break;
+            //}
+            traceIn(childNode);
+            traceOut(null);
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode fieldDecl() {
-        return null;
+    ASTNode fieldDecl(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case TYPE:
+                    type(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode methodDecl() {
-        return null;
+    ASTNode methodDecl(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case TYPE:
+                    type(childNode);
+                    break;
+                case BLOCK:
+                    block(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode type() {
-        return null;
+    ASTNode type(AST cstNode) {
+        traceIn(cstNode);
+        ASTNode astNode = null;
+
+        AST childNode   = cstNode.getFirstChild();
+        traceIn(childNode);
+        traceOut(null);
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode block() {
-        return null;
+    ASTNode block(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case FIELD_DECL:
+                    fieldDecl(childNode);
+                    break;
+                case STATEMENT:
+                    statement(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode statement() {
-        return null;
+    ASTNode statement(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case LOCATION:
+                    location(childNode);
+                    break;
+                case ASSIGN_EXPR:
+                    assignExpr(childNode);
+                    break;
+                case METHOD_CALL:
+                    methodCall(childNode);
+                    break;
+                case EXPR:
+                    expr(childNode);
+                    break;
+                case BLOCK:
+                    block(childNode);
+                    break;
+                case COMPOUND_ASSIGN_OP:
+                    compoundAssignOp(childNode);
+                    break;
+                case INCREMENT:
+                    increment(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode expr() {
-        return null;
+    ASTNode expr(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case LOCATION:
+                    location(childNode);
+                    break;
+                case METHOD_CALL:
+                    methodCall(childNode);
+                    break;
+                case LITERAL:
+                    literal(childNode);
+                    break;
+                case EXPR:
+                    expr(childNode);
+                    break;
+                case BIN_OP:
+                    binOp(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode location() {
-        return null;
+    ASTNode location(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case EXPR:
+                    expr(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode assignExpr() {
-        return null;
+    ASTNode assignExpr(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case ASSIGN_OP:
+                    assignOp(childNode);
+                    break;
+                case EXPR:
+                    expr(childNode);
+                    break;
+                case INCREMENT:
+                    increment(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode assignOp() {
-        return null;
+    ASTNode assignOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case COMPOUND_ASSIGN_OP:
+                    compoundAssignOp(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode compoundAssignOp() {
-        return null;
+    ASTNode compoundAssignOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode increment() {
-        return null;
+    ASTNode increment(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode methodCall() {
-        return null;
+    ASTNode methodCall(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case METHOD_NAME:
+                    methodName(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode methodName() {
-        return null;
+    ASTNode methodName(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode importArg() {
-        return null;
+    ASTNode importArg(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case EXPR:
+                    expr(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode binOp() {
-        return null;
+    ASTNode binOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case ARITH_OP:
+                    arithOp(childNode);
+                    break;
+                case REL_OP:
+                    relOp(childNode);
+                    break;
+                case EQ_OP:
+                    eqOp(childNode);
+                    break;
+                case COND_OP:
+                    condOp(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode arithOp() {
-        return null;
+    ASTNode arithOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode relOp() {
-        return null;
+    ASTNode relOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode eqOp() {
-        return null;
+    ASTNode eqOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode condOp() {
-        return null;
+    ASTNode condOp(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode literal() {
-        return null;
+    ASTNode literal(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                case BOOL_LITERAL:
+                    boolLiteral(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
-    ASTNode boolLiteral() {
-        return null;
+    ASTNode boolLiteral(AST cstNode) {
+        traceIn(cstNode);
+
+        ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        while(childNode != null) {
+            switch(childNode.getType()) {
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+            childNode = childNode.getNextSibling();
+        }
+
+        traceOut(astNode); 
+        return astNode;
     }
 
 }

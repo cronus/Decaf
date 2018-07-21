@@ -1,7 +1,13 @@
 ( program 
-    ( import_decl import random ) 
-    ( import_decl import srandom ) 
-    ( import_decl import printf ) 
+    ( import_decl 
+        import 
+        random ) 
+    ( import_decl 
+        import 
+        srandom ) 
+    ( import_decl 
+        import 
+        printf ) 
     ( field_decl ( type int ) A 100 ) 
     ( field_decl ( type int ) length ) 
     ( method_decl 

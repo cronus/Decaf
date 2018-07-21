@@ -1,6 +1,15 @@
 package edu.mit.compilers;
 
 abstract class ASTNode {
+    ASTNode() {
+    }
+}
+
+class ImportDeclNode extends ASTNode {
+    
+    ImportDeclNode() {
+    
+    }
 }
 
 abstract class ExpressionNode extends ASTNode {
