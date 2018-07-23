@@ -28,19 +28,23 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         this.debug = debug;
     }
 
-    public void traceIn(AST cstNode) {
+    public void CstTraceIn(AST cstNode) {
         if(!this.debug) {
             return;
         }
+        if(cstNode == null) {
+            return;
+        }
+
         for(int i = 0; i < traceDepth; i ++) {
             System.out.printf("\t");
         }
-        System.out.println(cstNode.getText());
+        System.out.println("CST:" + cstNode.getText());
 
         traceDepth += 1;
     }
 
-    public void traceOut(ASTNode astNode) {
+    public void CstTraceOut() {
         traceDepth -= 1;
         if(!this.debug) {
             return;
@@ -56,7 +60,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             return null;
         }
         // debug
-        traceIn(parseTree);
+        CstTraceIn(parseTree);
 
         ASTNode n = null;
         AST child = parseTree.getFirstChild();
@@ -77,38 +81,55 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             child = child.getNextSibling();
         }
 
-        traceOut(n); 
+        CstTraceOut(); 
+        // n.dump();
         return n;
     }
 
     ASTNode importDecl(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
-        ASTNode astNode = new ImportDeclNode();
+        // node needed for AST
+        ImportDeclNode importDeclNode;
+        IDNode         idNode;
+
+        // CST node
         AST childNode   = cstNode.getFirstChild();
 
+        int numberOfChildren = cstNode.getNumberOfChildren();
+        AST [] children      = new AST[numberOfChildren];
+        int childNo = 0;
+
+        // walk on CST tree 
+        // collect necessary info
         while(childNode != null) {
-            //System.out.println(childNode.getType()); 
-            //switch(childNode.getType()) {
-            //    case TK_import:
-            //        break;
-            //    case ID:
-            //        id(childNode);
-            //        break;
-            //}
-            traceIn(childNode);
-            traceOut(null);
+            CstTraceIn(childNode);
+            CstTraceOut();
+            children[childNo]= childNode; 
             childNode = childNode.getNextSibling();
+            childNo++;
         }
 
-        traceOut(astNode); 
-        return astNode;
+        // semantic action
+        //for(childNO = 0; childNO < numberOfChildren; childNo++) {
+        //}
+
+        // build AST
+        importDeclNode  = new ImportDeclNode();
+        idNode          = new IDNode(children[1].getText());
+        importDeclNode.addChild(idNode);
+
+        CstTraceOut(); 
+        return importDeclNode;
     }
 
     ASTNode fieldDecl(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
-        ASTNode astNode = null;
+        // AST node
+        FieldDeclNode fieldDeclNode;
+
+        // CST node
         AST childNode   = cstNode.getFirstChild();
 
         while(childNode != null) {
@@ -117,18 +138,21 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     type(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
-        return astNode;
+        // build ast
+        fieldDeclNode = new FieldDeclNode();
+
+        CstTraceOut(); 
+        return fieldDeclNode;
     }
 
     ASTNode methodDecl(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -142,30 +166,30 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     block(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode type(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
         ASTNode astNode = null;
 
         AST childNode   = cstNode.getFirstChild();
-        traceIn(childNode);
-        traceOut(null);
+        CstTraceIn(childNode);
+        CstTraceOut();
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode block(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -179,18 +203,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     statement(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode statement(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -219,18 +243,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     increment(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode expr(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -253,18 +277,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     binOp(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode location(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -275,18 +299,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     expr(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode assignExpr(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -303,18 +327,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     increment(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode assignOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -325,18 +349,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     compoundAssignOp(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode compoundAssignOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -344,18 +368,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode increment(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -363,18 +387,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode methodCall(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -385,18 +409,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     methodName(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode methodName(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -404,18 +428,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode importArg(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -426,18 +450,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     expr(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode binOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -457,18 +481,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     condOp(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode arithOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -476,18 +500,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode relOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -495,18 +519,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode eqOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -514,18 +538,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode condOp(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -533,18 +557,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode literal(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -555,18 +579,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     boolLiteral(childNode);
                     break;
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
     ASTNode boolLiteral(AST cstNode) {
-        traceIn(cstNode);
+        CstTraceIn(cstNode);
 
         ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
@@ -574,13 +598,13 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(childNode != null) {
             switch(childNode.getType()) {
                 default:
-                    traceIn(childNode);
-                    traceOut(null);
+                    CstTraceIn(childNode);
+                    CstTraceOut();
             }
             childNode = childNode.getNextSibling();
         }
 
-        traceOut(astNode); 
+        CstTraceOut(); 
         return astNode;
     }
 
