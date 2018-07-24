@@ -1,6 +1,7 @@
 package edu.mit.compilers;
 
 import java.io.*;
+import java.util.*;
 import antlr.Token;
 import antlr.CommonAST;
 import antlr.collections.AST;
@@ -57,12 +58,16 @@ abstract class LiteralNode extends ExpressionNode {
         super(name, type);
     }
 
+    void dump() {
+        System.out.println("AST: " + nodeName);
+    }
+
 }
 
 class IntLiteralNode extends LiteralNode {
 
-    IntLiteralNode(String name, int type) {
-        super(name, type);
+    IntLiteralNode(String name) {
+        super(name, INTLITERAL);
     }
 
 }
@@ -207,18 +212,40 @@ class ImportDeclNode extends MemberDeclNode {
 
 }
 
-class MethodDeclNode extends MemberDeclNode {
+class FieldDeclNode extends MemberDeclNode {
+  
+    protected TypeNode typeNode;
+    protected ArrayList<VarDeclNode> varNodes;
 
-    MethodDeclNode(String name, int type) {
-        super(name, type);
+    FieldDeclNode() {
+        super("field_decl", FIELD_DECL);
+
+        varNodes = new ArrayList<VarDeclNode>();
+    }
+
+    void addType(TypeNode typeNode) {
+        this.typeNode = typeNode;
+    }
+
+    void addVar(VarDeclNode varNode) {
+        varNodes.add(varNode);
+    }
+
+    void dump() {
+        typeNode.dump();
+        for(VarDeclNode varNode: varNodes) {
+            varNode.dump();
+        }
     }
 
 }
 
-class FieldDeclNode extends MemberDeclNode {
+class MethodDeclNode extends MemberDeclNode {
 
-    FieldDeclNode(String name, int type) {
-        super(name, type);
+    protected TypeNode typeNode;
+
+    MethodDeclNode() {
+        super("method_decl", METHOD_DECL);
     }
 
 }
@@ -234,21 +261,50 @@ class IDNode extends ASTNode {
     }
 }
 
-//class VarDeclNode extends ASTNode {
-//
-//    VarDeclNode(String name, int type) {
-//        super(name, type);
-//    }
-//
-//}
+class VarDeclNode extends ASTNode {
 
-class TypeNode extends ASTNode {
+    //TODO, use String name or IDNode?
+    protected String          name;
+    protected boolean         isArray;
+    protected IntLiteralNode  width;
 
-    TypeNode(String name, int type) {
-        super(name, type);
+    VarDeclNode(String name) {
+        super(name, ID);
+
+        this.isArray = false;
+        this.width   = null;
+    }
+
+    VarDeclNode(String name, IntLiteralNode width) {
+        super(name, ID);
+
+        this.isArray = true;
+        this.width   = width;
+    }
+
+    boolean isArray() {
+        return this.isArray;
     }
 
     void dump() {
+        if(isArray) {
+            System.out.println("AST: " + name);
+        } else {
+            System.out.println("AST: " + name);
+            width.dump();
+        }
+    }
+
+}
+
+class TypeNode extends ASTNode {
+
+    TypeNode(String name) {
+        super(name, TYPE);
+    }
+
+    void dump() {
+        System.out.println("AST: " + nodeName);
     }
 
 }

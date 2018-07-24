@@ -89,35 +89,30 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     ASTNode importDecl(AST cstNode) {
         CstTraceIn(cstNode);
 
-        // node needed for AST
+        // AST node
         ImportDeclNode importDeclNode;
         IDNode         idNode;
 
         // CST node
         AST childNode   = cstNode.getFirstChild();
 
-        int numberOfChildren = cstNode.getNumberOfChildren();
-        AST [] children      = new AST[numberOfChildren];
-        int childNo = 0;
+        // create AST node
+        importDeclNode  = new ImportDeclNode();
 
         // walk on CST tree 
         // collect necessary info
         while(childNode != null) {
             CstTraceIn(childNode);
             CstTraceOut();
-            children[childNo]= childNode; 
+
+            if(childNode.getType() == ID) {
+                idNode = new IDNode(childNode.getText());
+                importDeclNode.addChild(idNode);
+            }
+
             childNode = childNode.getNextSibling();
-            childNo++;
         }
 
-        // semantic action
-        //for(childNO = 0; childNO < numberOfChildren; childNo++) {
-        //}
-
-        // build AST
-        importDeclNode  = new ImportDeclNode();
-        idNode          = new IDNode(children[1].getText());
-        importDeclNode.addChild(idNode);
 
         CstTraceOut(); 
         return importDeclNode;
@@ -127,27 +122,51 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         CstTraceIn(cstNode);
 
         // AST node
-        FieldDeclNode fieldDeclNode;
+        FieldDeclNode  fieldDeclNode;
+        TypeNode       typeNode;
+        VarDeclNode    varNode;
+        IntLiteralNode width;
 
         // CST node
         AST childNode   = cstNode.getFirstChild();
 
+        // create ast node
+        fieldDeclNode = new FieldDeclNode();
+
+        // walk on CST tree 
+        // collect necessary info and build ast
         while(childNode != null) {
+            // recursive call and print cst
             switch(childNode.getType()) {
                 case TYPE:
-                    type(childNode);
+                    typeNode = (TypeNode) type(childNode);
+                    fieldDeclNode.addType(typeNode);
                     break;
                 default:
                     CstTraceIn(childNode);
                     CstTraceOut();
             }
+            
+            // check if is array
+            if(childNode.getNextSibling() != null && 
+               childNode.getNextSibling().getType() == INTLITERAL) {
+
+               // create IntLiteralNode
+               width = new IntLiteralNode(childNode.getNextSibling().getText());
+               varNode = new VarDeclNode(childNode.getText(), width); 
+               fieldDeclNode.addVar(varNode);
+
+            } else {
+               varNode = new VarDeclNode(childNode.getText()); 
+               fieldDeclNode.addVar(varNode);
+            }
+
             childNode = childNode.getNextSibling();
         }
 
-        // build ast
-        fieldDeclNode = new FieldDeclNode();
 
         CstTraceOut(); 
+
         return fieldDeclNode;
     }
 
