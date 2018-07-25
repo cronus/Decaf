@@ -1,6 +1,7 @@
 package edu.mit.compilers;
 
 import java.io.*;
+import java.util.*;
 import antlr.Token;
 import antlr.CommonAST;
 import antlr.collections.AST;
@@ -17,12 +18,24 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
     private int traceDepth;
 
+    protected ProgramDescriptor pgmDesc;
+    protected ASTNode  root;
+
     public ConcreteTreeParser(CommonAST parseTree) {
         this.parseTree  = parseTree;
         this.debug      = false;
         this.traceDepth = 0;
+
+        pgmDesc = new ProgramDescriptor();
     }
 
+    ProgramDescriptor getProgDescriptor() {
+        return pgmDesc;
+    }
+
+    ASTNode getAST() {
+        return root;
+    }
 
     public void setTrace(boolean debug) {
         this.debug = debug;
@@ -91,7 +104,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         // AST node
         ImportDeclNode importDeclNode;
-        IDNode         idNode;
+        String         idNode;
 
         // CST node
         AST childNode   = cstNode.getFirstChild();
@@ -106,7 +119,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             CstTraceOut();
 
             if(childNode.getType() == ID) {
-                idNode = new IDNode(childNode.getText());
+                idNode = childNode.getText();
                 importDeclNode.addChild(idNode);
             }
 

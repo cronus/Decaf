@@ -193,21 +193,25 @@ abstract class MemberDeclNode extends ASTNode {
 //     ID
 class ImportDeclNode extends MemberDeclNode {
     
-    protected IDNode child;
+    protected String child;
 
     ImportDeclNode() {
         super("import", TK_import);
         this.child = child;
     }
 
-    void addChild(IDNode child) {
+    void addChild(String child) {
         this.child = child;
+    }
+
+    String getChild() {
+        return child;
     }
 
     void dump() {
         System.out.println("AST: import");
         System.out.printf("\t");
-        child.dump();
+        System.out.printf("AST: " + child);
     }
 
 }
@@ -231,6 +235,14 @@ class FieldDeclNode extends MemberDeclNode {
         varNodes.add(varNode);
     }
 
+    TypeNode getTypeNode() {
+        return typeNode;
+    }
+
+    ArrayList<VarDeclNode> getVarNodes() {
+        return varNodes;
+    }
+
     void dump() {
         typeNode.dump();
         for(VarDeclNode varNode: varNodes) {
@@ -248,17 +260,6 @@ class MethodDeclNode extends MemberDeclNode {
         super("method_decl", METHOD_DECL);
     }
 
-}
-
-class IDNode extends ASTNode {
-    
-    IDNode(String name) {
-        super(name, ID);
-    }
-
-    void dump() {
-        System.out.println("AST:" + nodeName);
-    }
 }
 
 class VarDeclNode extends ASTNode {
