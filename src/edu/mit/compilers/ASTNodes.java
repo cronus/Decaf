@@ -255,16 +255,22 @@ class FieldDeclNode extends MemberDeclNode {
 class MethodDeclNode extends MemberDeclNode {
 
     protected TypeNode typeNode;
+    protected ParaDeclNode paraDeclNode;
 
     MethodDeclNode() {
         super("method_decl", METHOD_DECL);
+
+        typeNode = null;
     }
+
+   void addType(TypeNode typeNode) {
+       this.typeNode = typeNode;
+   }
 
 }
 
 class VarDeclNode extends ASTNode {
 
-    //TODO, use String name or IDNode?
     protected String          name;
     protected boolean         isArray;
     protected IntLiteralNode  width;
@@ -298,6 +304,42 @@ class VarDeclNode extends ASTNode {
 
 }
 
+class ParaDeclNode extends ASTNode {
+
+    protected TypeNode typeNode;
+    protected ArrayList<VarDeclNode> varNodes;
+
+    ParaDeclNode() {
+        super("para_decl", FIELD_DECL);
+
+        varNodes = new ArrayList<VarDeclNode>();
+    }
+
+    void addType(TypeNode typeNode) {
+        this.typeNode = typeNode;
+    }
+
+    void addVar(VarDeclNode varNode) {
+        varNodes.add(varNode);
+    }
+
+    TypeNode getTypeNode() {
+        return typeNode;
+    }
+
+    ArrayList<VarDeclNode> getVarNodes() {
+        return varNodes;
+    }
+
+    void dump() {
+        typeNode.dump();
+        for(VarDeclNode varNode: varNodes) {
+            varNode.dump();
+        }
+    }
+
+}
+
 class TypeNode extends ASTNode {
 
     TypeNode(String name) {
@@ -308,4 +350,26 @@ class TypeNode extends ASTNode {
         System.out.println("AST: " + nodeName);
     }
 
+}
+
+class ProgramNode extends ASTNode {
+
+    ArrayList<ASTNode> children;
+
+    ProgramNode() {
+        super("program", PROGRAM);
+
+        children = new ArrayList<ASTNode>();
+    }
+
+    void addChild(ASTNode child) {
+        children.add(child);
+    }
+
+    ArrayList<ASTNode> getChildren() {
+        return children;
+    }
+
+    void dump() {
+    }
 }
