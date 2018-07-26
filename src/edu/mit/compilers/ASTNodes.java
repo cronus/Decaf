@@ -260,29 +260,49 @@ class MethodDeclNode extends MemberDeclNode {
     protected TypeNode typeNode;
     protected ParaDeclNode paraDeclNode;
     protected ArrayList<StatementNode> stmtNodes;
+    protected ArrayList<FieldDeclNode> localFieldDeclNodes;
+    protected boolean isExMethod;
+
+    protected String methodName;
 
     MethodDeclNode() {
         super("method_decl", METHOD_DECL);
 
-        typeNode     = null;
-        paraDeclNode = null;
-        stmtModes    = new ArrayList<StatementNode>();
+        typeNode            = null;
+        paraDeclNode        = null;
+        stmtModes           = new ArrayList<StatementNode>();
+        localFieldDeclNodes = new ArrayList<FieldDeclNOde>();
+        isExMethod          = false;
     }
 
    void addType(TypeNode typeNode) {
        this.typeNode = typeNode;
    }
 
+   void setMethodName(String name) {
+       this.methodName = name;
+   }
+
    void addPara(ParaDeclNode paraDeclNode) {
        this.paraDeclNode = paraDeclNode;
+   }
+
+   void addFieldDecl(FieldDeclNode fielDeclNode) {
+       this.localFieldDeclNodes.add(fieldDeclNode);
    }
 
    void addStmt(StatementNode stmtNode) {
        this.stmtNodes.add(stmtNode);
    }
 
-   void nullStmt() {
-       this.stmtNodes = null;
+   void setExMethod() {
+       stmtNodes           = null;
+       localFieldDeclNodes = null;
+       isExMethod          = true;
+   }
+
+   boolean isExMethod() {
+       return isExMethod;
    }
 
 }
@@ -324,25 +344,26 @@ class VarDeclNode extends ASTNode {
 
 class ParaDeclNode extends ASTNode {
 
-    protected TypeNode typeNode;
+    protected ArrayList<TypeNode>    typeNodes;
     protected ArrayList<VarDeclNode> varNodes;
 
     ParaDeclNode() {
         super("para_decl", FIELD_DECL);
 
-        varNodes = new ArrayList<VarDeclNode>();
+        typeNodes = new ArrayList<TypeNode>();
+        varNodes  = new ArrayList<VarDeclNode>();
     }
 
     void addType(TypeNode typeNode) {
-        this.typeNode = typeNode;
+        this.typeNodes.add(typeNode);
     }
 
     void addVar(VarDeclNode varNode) {
         varNodes.add(varNode);
     }
 
-    TypeNode getTypeNode() {
-        return typeNode;
+    ArrayList<TypeNode> getTypeNodes() {
+        return typeNodes;
     }
 
     ArrayList<VarDeclNode> getVarNodes() {
@@ -389,5 +410,8 @@ class ProgramNode extends ASTNode {
     }
 
     void dump() {
+        for(ASTNode astNode: children) {
+            astNode.dump();
+        }
     }
 }

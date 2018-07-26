@@ -8,10 +8,14 @@
     ( import_decl 
         import 
         printf ) 
-    ( field_decl ( type int ) A 100 ) 
+    ( field_decl 
+        ( type int ) 
+        A 
+        100 ) 
     ( field_decl ( type int ) length ) 
     ( method_decl 
-        ( type int ) 
+        ( type 
+            int ) 
         partition 
         ( type int ) 
         p 

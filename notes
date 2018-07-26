@@ -22,3 +22,49 @@
 
 2. redirect to /dev/null
      redirect stdout to /dev/null, i.e. discard/silent the output by command
+
+3. can cast child instance to parent type, and cast back, NO member loss!
+    public class Phone {
+        private boolean has3g;
+    
+        public boolean has3g() {
+            return has3g;
+        }
+    
+        public void setHas3g(boolean newVal) {
+            has3g = newVal;
+        }
+    }
+    
+    public class Blackberry extends Phone {
+        private boolean hasKeyboard;
+    
+        public boolean hasKeyboard() {
+            return hasKeyboard;
+        }
+    
+        public void setHasKeyboard(boolean newVal) {
+            hasKeyboard = newVal;
+        }
+    }
+    
+    If I was to create an instance of Blackberry, cast it to a Phone object and then cast it back to Blackberry, would the original Blackberry object lose its member variables? E.g:
+    
+        Blackbery blackbery = new Blackberry();
+        blackbery.setHasKeyboard(true);
+    
+        Phone phone = (Phone)blackbery;
+    
+        Blackberry blackberry2 = (Blackberry)phone;
+    
+        // would blackberry2 still contain its original hasKeyboard value?
+        boolean hasKeyBoard = blackberry2.hasKeyboard();
+
+Q: If I was to create an instance of Blackberry, cast it to a Phone object and then cast it back to Blackberry, would the original Blackberry object lose its member variables?
+A: You have instantiated a Blackberry. This will remain a Blackberry until the it is GCed.
+   When you cast it to Phone you are not changing the fact that the type is Blackberry. 
+   You are just treating it as a Phone i.e. you have only access to its generic properties (that of Phone).
+   The extended properties of Blackberry are no longer visible despite the fact that the concrete instance is still a Blackberry 
+   and you can successfully cast it back to access the Blackberry properties.
+
+4. 

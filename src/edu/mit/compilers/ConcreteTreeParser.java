@@ -84,13 +84,10 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     void program() {
         if(parseTree.getFirstChild() == null) {
             System.out.println("no concrete parse tree");
-            //return null;
+            return;
         }
 
         traceIn(parseTree);
-
-        // AST node
-        ASTNode astChild;
 
         // CST node
         AST cstChild = parseTree.getFirstChild();
@@ -100,19 +97,28 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(cstChild.getText() != null) {
             switch(cstChild.getType()) {
                 case IMPORT_DECL: 
+
                     ImportDeclNode astChild = new ImportDeclNode();
-                    importDecl(cstChild, astChild);
                     root.addChild(astChild);
+
+                    importDecl(cstChild, astChild);
+
                     break;
                 case FIELD_DECL:
+
                     FieldDeclNode astChild = new FieldChildNode();
-                    fieldDecl(cstChild, astChild);
                     root.addChild(astChild);
+
+                    fieldDecl(cstChild, astChild);
+
                     break;
                 case METHOD_DECL:
+
                     MethodDeclNode astChild = new MethodDeclNode();
-                    methodDecl(cstChild, astChild);
                     root.addChild(astChild);
+
+                    methodDecl(cstChild, astChild);
+
                     break;
             }
             cstChild = cstChild.getNextSibling();
@@ -126,13 +132,6 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     void importDecl(AST cstNode, ImportDeclNode importDeclNode) {
         traceIn(cstNode);
 
-        // AST node
-        //ImportDeclNode importDeclNode = new ImportDeclNode();
-        MethodDeclNode   exMethod;
-        TypeNode         methodType;
-        TypeNode         ParaType;
-        ParaDeclNode     paraDecl;
-
         // CST node
         AST childNode   = cstNode.getFirstChild();
 
@@ -143,29 +142,25 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             traceOut(null);
 
             if(childNode.getType() == ID) {
-                exMethod   = new MethodDeclNode();
-                methodType = new TypeNode("int");
-                paraType   = new Type();
-                paraDecl   = new ParaDeclNode();
-                paraDecl.addType(paraType);
-                exMethod.addType(typeNode);
-                exMethod.addPara(paraDecl);
+                MethodDeclNode exMethod   = new MethodDeclNode();
                 importDeclNode.addChild(exMethod);
+
+                TypeNode methodType   = new TypeNode("int");
+                ParaDeclNode paraDecl = new ParaDeclNode();
+                exMethod.addType(methodType);
+                exMethod.setExMethod();
             }
 
             childNode = childNode.getNextSibling();
         }
 
-
         traceOut(importDeclNode); 
-        //return importDeclNode;
     }
 
     void fieldDecl(AST cstNode, FieldDeclNode fieldDeclNode) {
         traceIn(cstNode);
 
         // AST node
-        //FieldDeclNode  fieldDeclNode = new FieldDeclNode();
         TypeNode       typeNode;
         VarDeclNode    varNode;
         IntLiteralNode width;
@@ -179,8 +174,9 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             // recursive call and print cst
             switch(childNode.getType()) {
                 case TYPE:
-                    typeNode = (TypeNode) type(childNode);
+                    TypeNode typeNode = new TypeNode(childNode.getText());
                     fieldDeclNode.addType(typeNode);
+                    type(childNode);
                     break;
                 default:
                     traceIn(childNode);
@@ -200,36 +196,53 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                varNode = new VarDeclNode(childNode.getText()); 
                fieldDeclNode.addVar(varNode);
             }
-
             childNode = childNode.getNextSibling();
         }
 
-
         traceOut(fieldDeclNode); 
-
-        //return fieldDeclNode;
     }
 
     void methodDecl(AST cstNode, MethodDeclNode methodDeclNode) {
         traceIn(cstNode);
-
-        // AST node
-        //MethodDeclNode methodDeclNode = new MethodDeclNode();
 
         // CST node
         AST childNode  = cstNode.getFirstChild();
 
         // walk on CST tree 
         // collect necessary info and build AST
+
+        // method return type
+        // if first chidl is TYPE type, add a TypeNode
+        // else the return type is void, methodDeclNode.typeNode = null
+        if(childNode.getType() == TYPE) {
+            TypeNode typeNode = new TypeNode(childNode.getText());
+            methodDeclNode.addType(typeNode);
+        }
+        childNode = childNode.getNextSibling();
+
+        // method name
+        methodDeclNode.setMethodName(childNode.getText());
+        childNode = childNode.getNextSibling();
+
+        // parameter declaration
+        ParaDeclNode paraDeclNode = new ParaDeclNode();
+        methodDeclNode.addPara(paraDeclNode);
+
         while(childNode != null) {
             switch(childNode.getType()) {
                 case TYPE:
+                    TypeNode paraType = new TypeNode(childNode.getText());
+                    paraDeclNode.addType(paraType);
                     type(childNode);
                     break;
                 case BLOCK:
-                    block(childNode);
+                    block(childNode, methodDeclNode);
                     break;
+                // ID token
                 default:
+                    VarDeclNode paraVar = new VarDeclNode(childNode.getText());
+                    paraDeclNode.addVar(paraVar);
+           
                     traceIn(childNode);
                     traceOut(null);
             }
@@ -255,16 +268,36 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     void block(AST cstNode, ASTNode astNode) {
         traceIn(cstNode);
 
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
+        // method decl ----> block
+        if(astNode instanceof fieldDeclNode) {
+        
+        // if ----> block
+        } else if(astNode instanceof ) {
+
+        // for ----> block
+        } else if(astNode instanceof ) {
+
+        // while ----> block
+        } else if(astNode instanceof ) {
+
+        } else {
+            
+            System.err.println("not expected caller of block");
+            System.exit(1);
+        }
+
+        // CST
+        AST childNode = cstNode.getFirstChild();
 
         while(childNode != null) {
             switch(childNode.getType()) {
                 case FIELD_DECL:
-                    fieldDecl(childNode);
+                    FieldDeclNode fDeclN = new FieldDeclNode();
+                    methodDeclNode.addFieldDecl(fDeclN);
+                    fieldDecl(childNode, fDeclN);
                     break;
                 case STATEMENT:
-                    statement(childNode);
+                    statement(childNode, methodDeclNode);
                     break;
                 default:
                     traceIn(childNode);
@@ -274,7 +307,6 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         }
 
         traceOut(null); 
-        //return astNode;
     }
 
     void statement(AST cstNode, ASTNode astNode) {
