@@ -193,15 +193,18 @@ abstract class MemberDeclNode extends ASTNode {
 //     ID
 class ImportDeclNode extends MemberDeclNode {
     
-    protected String child;
+    protected MethodDeclNode child;
 
     ImportDeclNode() {
         super("import", TK_import);
         this.child = child;
     }
 
-    void addChild(String child) {
+    void addChild(MethodDeclNode child) {
         this.child = child;
+
+        // external method has no statements 
+        this.child.nullStmt();
     }
 
     String getChild() {
@@ -256,15 +259,30 @@ class MethodDeclNode extends MemberDeclNode {
 
     protected TypeNode typeNode;
     protected ParaDeclNode paraDeclNode;
+    protected ArrayList<StatementNode> stmtNodes;
 
     MethodDeclNode() {
         super("method_decl", METHOD_DECL);
 
-        typeNode = null;
+        typeNode     = null;
+        paraDeclNode = null;
+        stmtModes    = new ArrayList<StatementNode>();
     }
 
    void addType(TypeNode typeNode) {
        this.typeNode = typeNode;
+   }
+
+   void addPara(ParaDeclNode paraDeclNode) {
+       this.paraDeclNode = paraDeclNode;
+   }
+
+   void addStmt(StatementNode stmtNode) {
+       this.stmtNodes.add(stmtNode);
+   }
+
+   void nullStmt() {
+       this.stmtNodes = null;
    }
 
 }
