@@ -270,18 +270,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         // method decl ----> block
         if(astNode instanceof fieldDeclNode) {
-        
+            FieldDeclNode an = (FieldDeclNode) astNode; 
         // if ----> block
-        } else if(astNode instanceof ) {
-
+        } else if(astNode instanceof IfStmtNode) {
+            IfStmtNode an = (IfStmtNode) astNode;
         // for ----> block
-        } else if(astNode instanceof ) {
-
+        } else if(astNode instanceof ForStmtNode) {
+            ForStmtNode an = (ForStmtNode) astNode;
         // while ----> block
-        } else if(astNode instanceof ) {
-
+        } else if(astNode instanceof WhileStmtNode) {
+            WhileStmtNode an = (WhileStmtNode) astNode;
         } else {
-            
+            FieldDeclNode an = (FieldDeclNode) astNode; 
             System.err.println("not expected caller of block");
             System.exit(1);
         }
@@ -293,11 +293,11 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             switch(childNode.getType()) {
                 case FIELD_DECL:
                     FieldDeclNode fDeclN = new FieldDeclNode();
-                    methodDeclNode.addFieldDecl(fDeclN);
-                    fieldDecl(childNode, fDeclN);
+                    an.addFieldDecl(fDeclN);
+                    fieldDecl(childNode, an);
                     break;
                 case STATEMENT:
-                    statement(childNode, methodDeclNode);
+                    statement(childNode, an);
                     break;
                 default:
                     traceIn(childNode);
