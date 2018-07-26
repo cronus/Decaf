@@ -207,7 +207,7 @@ class ImportDeclNode extends MemberDeclNode {
         this.child.nullStmt();
     }
 
-    String getChild() {
+    MethodDeclNode getChild() {
         return child;
     }
 

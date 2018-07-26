@@ -128,7 +128,10 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         // AST node
         //ImportDeclNode importDeclNode = new ImportDeclNode();
-        String         idNode;
+        MethodDeclNode   exMethod;
+        TypeNode         methodType;
+        TypeNode         ParaType;
+        ParaDeclNode     paraDecl;
 
         // CST node
         AST childNode   = cstNode.getFirstChild();
@@ -140,8 +143,14 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             traceOut(null);
 
             if(childNode.getType() == ID) {
-                idNode = childNode.getText();
-                importDeclNode.addChild(idNode);
+                exMethod   = new MethodDeclNode();
+                methodType = new TypeNode("int");
+                paraType   = new Type();
+                paraDecl   = new ParaDeclNode();
+                paraDecl.addType(paraType);
+                exMethod.addType(typeNode);
+                exMethod.addPara(paraDecl);
+                importDeclNode.addChild(exMethod);
             }
 
             childNode = childNode.getNextSibling();
