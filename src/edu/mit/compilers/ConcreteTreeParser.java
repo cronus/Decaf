@@ -125,8 +125,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         }
 
         traceOut(root); 
-        // n.dump();
-        //return n;
+        // root.dump();
     }
 
     void importDecl(AST cstNode, ImportDeclNode importDeclNode) {
@@ -250,10 +249,9 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         }
 
         traceOut(methodDeclNode); 
-        //return methodDeclNode;
     }
 
-    ASTNode type(AST cstNode) {
+    void type(AST cstNode) {
         traceIn(cstNode);
         ASTNode astNode = null;
 
@@ -262,42 +260,29 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         traceOut(null);
 
         traceOut(null); 
-        //return astNode;
     }
 
     void block(AST cstNode, ASTNode astNode) {
         traceIn(cstNode);
 
-        // method decl ----> block
         if(astNode instanceof fieldDeclNode) {
-            FieldDeclNode an = (FieldDeclNode) astNode; 
-        // if ----> block
-        } else if(astNode instanceof IfStmtNode) {
-            IfStmtNode an = (IfStmtNode) astNode;
-        // for ----> block
-        } else if(astNode instanceof ForStmtNode) {
-            ForStmtNode an = (ForStmtNode) astNode;
-        // while ----> block
-        } else if(astNode instanceof WhileStmtNode) {
-            WhileStmtNode an = (WhileStmtNode) astNode;
+            FieldDeclNode localASTNode = (FieldDeclNode) astNode; 
         } else {
-            FieldDeclNode an = (FieldDeclNode) astNode; 
-            System.err.println("not expected caller of block");
-            System.exit(1);
+            StatementNode localASTNode = (StatementNode) astNode;
         }
 
-        // CST
+        // CST node
         AST childNode = cstNode.getFirstChild();
 
         while(childNode != null) {
             switch(childNode.getType()) {
                 case FIELD_DECL:
                     FieldDeclNode fDeclN = new FieldDeclNode();
-                    an.addFieldDecl(fDeclN);
-                    fieldDecl(childNode, an);
+                    localASTNode.addFieldDecl(fDeclN);
+                    fieldDecl(childNode, fDeclN);
                     break;
                 case STATEMENT:
-                    statement(childNode, an);
+                    statement(childNode, localASTNode);
                     break;
                 default:
                     traceIn(childNode);
@@ -312,37 +297,72 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     void statement(AST cstNode, ASTNode astNode) {
         traceIn(cstNode);
 
-        ASTNode astNode = null;
+        if(astNode instanceof fieldDeclNode) {
+            FieldDeclNode localASTNode = (FieldDeclNode) astNode; 
+        } else {
+            StatementNode localASTNode = (StatementNode) astNode;
+        }
+
+        // CST node
         AST childNode   = cstNode.getFirstChild();
 
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case LOCATION:
-                    location(childNode);
-                    break;
-                case ASSIGN_EXPR:
-                    assignExpr(childNode);
-                    break;
-                case METHOD_CALL:
-                    methodCall(childNode);
-                    break;
-                case EXPR:
-                    expr(childNode);
-                    break;
-                case BLOCK:
-                    block(childNode);
-                    break;
-                case COMPOUND_ASSIGN_OP:
-                    compoundAssignOp(childNode);
-                    break;
-                case INCREMENT:
-                    increment(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
+        switch(childNode.getType()) {
+            //case LOCATION:
+            //    location(childNode);
+            //    break;
+            //case ASSIGN_EXPR:
+            //    assignExpr(childNode);
+            //    break;
+            //case METHOD_CALL:
+            //    methodCall(childNode);
+            //    break;
+            //case EXPR:
+            //    expr(childNode);
+            //    break;
+            //case BLOCK:
+            //    block(childNode);
+            //    break;
+            //case COMPOUND_ASSIGN_OP:
+            //    compoundAssignOp(childNode);
+            //    break;
+            //case INCREMENT:
+            //    increment(childNode);
+            //    break;
+            //default:
+            //    traceIn(childNode);
+            //    traceOut(null);
+            
+            case LOCATION:
+                location(childNode, locatASTNode);
+                break;
+            case METHOD_CALL:
+                methodCall(childNode, locatASTNode);
+                break;
+            case TK_if:
+                IfStmtNode ifStmtNode = new IfStmtNode();
+                localASTNode.addChild(ifStmtNode);
+                ifStmt(childNode, ifStmtNode);
+                break;
+            case TK_for:
+                ForStmtNode forStmtNode = new ForStmtNode();
+                localASTNode.addChild(forStmtNode);
+                forStmt(childNode, forStmtNode);
+                break;
+            case TK_while:
+                WhildStmtNode whileStmtNode = new WhileStmtNode();
+                localASTNode.addChild(whileStmtNode);
+                whileStmt(childNode, whileStmtNode);
+                break;
+            case TK_break:
+                BreakStmtNode breakStmtNode = new BreakStmtNode();
+                localASTNode.addChild(breakStmtNode);
+                breakStmt(childNode, breakStmtNode);
+                break;
+            case TK_continue:
+                ContinueStmtNode continueStmtNode = new ContinueStmtNode();
+                localASTNode.addChild(continueStmtNode);
+                returnStmt(childNode, continueStmtNode);
+                break;
         }
 
         traceOut(null); 
