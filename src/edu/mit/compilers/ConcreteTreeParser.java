@@ -360,9 +360,13 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         // cst: "method_call" node
         traceIn(cstNode);
 
+        // CST
         AST childNode   = cstNode.getFirstChild();
 
-        if(childNode.getNextSibling().getType() == EXPR) {
+        String methodName = childNode.getFirstChild().getText();
+        HashMap<String, MethodDescriptor> methodST = pgmDesc.getMethodST();
+
+        if(methodST.contains(methodName)) {
             return methodCallStmt(childNode);
         } else {
             return calloutStmt(childNode);
@@ -376,34 +380,143 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         // cst: "method_name" node
         traceIn(cstNode);
         
+        // AST
+        MethodCallStmtNode = methodCallStmtNode;
+
+        String name;
+        name = methodName.getText();
+        methodCallStmtNode = new MethodCallStmtNode(name);
+
         // CST
-        AST callExpr = methodName.getNextSibling();
+        // expression list
+        AST callExpr = methodName.getNextSibling().getFirstChild();
 
+        while(callExpr != null) {
 
+            ExpressionNode exprCall = expr(callNode);
+            methodCallStmtNode.addExpr(exprCall);
+            callExpr = callExpr.getNextSibling();
+        }
+
+        return methodCallStmt;
     }
 
     CalloutStmtNode calloutStmtNode(AST methodName) {
         // cst: "method_name" node
         traceIn(cstNode);
 
+        // AST
+        CalloutStmtNode calloutStmtNode;
+        String name;
+
+        name = methodName.getText();
+        calloutStmtNode = new CalloutStmtNode(name);
+
+        // CST
+        //AST callExpr = methodName.getNextSibling().getFirstChild();
+
+        return calloutStmtNode;
     }
 
-    IfStmtNode ifStmt(AST cst) {
+    IfStmtNode ifStmt(AST ifCST) {
+        // "if"
+        traceIn(ifCST);
+
+        // AST
+        IfStmtNode ifStmtNode;
+
+        // CST
+        AST conditionExprCST;
+        AST tBlockCST;
+        AST fBlockCST;
+        
+        // CST condition node
+        conditionExprCST = ifCST.getNextSibling();
+        ExpressionNode conditionExpr = expr(conditionExprCST);
+        
+        // CST block node
+        tBlockCST = conditionExprCST.getNextSibling();
+
+        // build AST
+        if(tBlockCST.getSibling() == null) {
+            ifStmtNode = new IfStmtNode(condition, false);
+            // true block
+            AST tBlockChild = tBlockCST.getFirstChild();
+            while(tBlockChild != null) {
+                switch(tBlockChild.getType()) {
+                    case FIELD_DECL:
+                        FieldDeclNode fieldDeclNode = fieldDecl(tBlockChild);
+                        ifStmtNode.addTFieldDecl(fieldDeclNode);
+                        break;
+                    case STATEMENT:
+                        StatementNode stmtNode = statement(tBlockChild);
+                        ifStmtNode.addTStmt(stmtNode);
+                        break;
+                }
+                tBlockChild = tBlockChild.getNextSibling();
+            }
+            return ifStmtNode;
+        } else {
+            ifStmtNode = new IfStmtNode(condition, true);
+            // true block
+            AST tBlockChild = tBlockCST.getFirstChild();
+            while(tBlockChild != null) {
+                switch(tBlockChild.getType()) {
+                    case FIELD_DECL:
+                        FieldDeclNode fieldDeclNode = fieldDecl(tBlockChild);
+                        ifStmtNode.addTFieldDecl(fieldDeclNode);
+                        break;
+                    case STATEMENT:
+                        StatementNode stmtNode = statement(tBlockChild);
+                        ifStmtNode.addTStmt(stmtNode);
+                        break;
+                }
+                tBlockChild = tBlockChild.getNextSibling();
+            }
+
+            // false block
+            fBlockCST = tBlockCST.getSibling().getSibling();
+            AST fBlockChild = fBlockCST.getFirstChild();
+            while(fBlockChild != null) {
+                switch(tBlockChild.getType()) {
+                    case FIELD_DECL:
+                        FieldDeclNode fieldDeclNode = fieldDecl(fBlockChild);
+                        ifStmtNode.addFFieldDecl(fieldDeclNode);
+                        break;
+                    case STATEMENT:
+                        StatementNode stmtNode = statement(fBlockChild);
+                        ifStmtNode.addFStmt(stmtNode);
+                        break;
+                }
+                fBlockChild = fBlockChild.getNextSibling();
+            }
+            return ifStmtNode;
+        }
+        
     }
 
     ForStmtNode forStmt(AST cst) {
+        // "for"
+        traceIn(cstNode);
     }
 
     WhileStmtNode whildStmt(AST cst) {
+        // "while"
+        traceIn(cstNode);
     }
 
     BreakStmtNode breakStmt(AST cst) {
+        // "break"
+        traceIn(cstNode);
     }
 
     ReturnStmtNode returnStmt(AST cst) {
+        // "return"
+        traceIn(cstNode);
     }
 
     ExpressionNode expr(AST cstNode) {
+        // "expr"
         traceIn(cstNode);
 
         //ASTNode astNode = null;

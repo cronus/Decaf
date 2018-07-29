@@ -245,39 +245,104 @@ abstract CallStmtNode extends StatementNode {
 }
 
 class MethodCallStmtNode extends CallStmtNode {
+
+    private final String methodName;
+    private final ArrayList<ExpressionNode> expressionNodes;
     
-    MethodCallStmtNode() {
+    MethodCallStmtNode(String methodName) {
         super("methodCall", METHOD_CALL);
+
+        this.methodName      = methodName;
+        this.expressionNodes = new ArrayList<ExpressionNode>();
+    }
+
+    void addExpr(ExpressionNode expr) {
+        expressionNodes.add(expr);
+    }
+
+    String getMethodName() {
+        return methodName;
+    }
+
+    ArrayList<ExpressionNode> getExpressionNodes() {
+        return expressionNodes;
     }
 }
 
 class CalloutStmtNode extends CallStmtNode {
+
+    private final String methodName;
     
-    CalloutStmtNode() {
+    CalloutStmtNode(String methodName) {
         super("callout", METHOD_CALL);
+
+        this.methodName = methodName;
     }
+
+    String getMethodName() {
+        return methodName;
+    }
+}
+
+class IfStmtNode extends StatementNode {
+
+    private final ExpressionNode condition;
+    private final ArrayList<FieldDeclNode> tFDNodes;
+    private final ArrayList<StatementNode> tStmtNodes;
+    private final ArrayList<FieldDeclNode> fFDNodes;
+    private final ArrayList<StatementNode> fStmtNodes;
+    private final boolean haveElse;
+    
+    IfStmtNode(Expression condition, boolean haveElse) {
+        super("if", TK_if);
+
+        this.condition = condition;
+        tFDNodes       = new ArrayList<FieldDeclNode>();
+        tStmtNodes     = new ArrayList<StatementNode>();
+
+        this.haveElse  = haveElse;
+
+        if(haveElse) {
+            fFDNodes       = new ArrayList<FieldDeclNode>();
+            fStmtNodes     = new ArrayList<StatementNode>();
+        } else {
+            fFDNodes       = null;
+            fStmtNodes     = null;
+        }
+    }
+
+    void addTFieldDecl(FieldDeclNode fd) {
+        tFDNodes.add(fd);
+    }
+
+    void addTStmt(StatementNode sn) {
+        tStmtNodes.add(sn);
+    }
+
+    void addFFieldDecl(FieldDeclNode fd) {
+        fFDNodes.add(fd);
+    }
+
+    void addFStmt(StatementNode sn) {
+        fStmtNodes.add(sn);
+    }
+}
+
+class ForStmtNode extends StatementNode {
+
+    private final String idName;
+    private final Expre
+
+    ForStmtNode() {
+        super("for", TK_for);
+    }
+
 }
 
 class BreakStmtNode extends StatementNode {
 
     BreakStmtNode() {
         super("break", TK_break);
-    }
-
-}
-
-class IfStmtNode extends StatementNode {
-
-    IfStmtNode() {
-        super("if", TK_if);
-    }
-
-}
-
-class ForStmtNode extends StatementNode {
-
-    ForStmtNode() {
-        super("for", TK_for);
     }
 
 }
