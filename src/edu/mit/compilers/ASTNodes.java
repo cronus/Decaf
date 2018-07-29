@@ -80,6 +80,39 @@ class BoolLiteralNode extends LiteralNode {
 
 }
 
+class LocationNode extends ExpressionNode {
+    
+    private final String name;
+    private final int index;
+    private final boolean isArrayElement;
+
+    LocationNode(String name) {
+        super("location", LOCATION);
+        this.name           = name;
+        this.index          = -1;
+        this.isArrayElement = false;
+    }
+
+    LocationNode(String name, int index) {
+        super("location", LOCATION);
+        this.name           = name;
+        this.index          = index;
+        this.isArrayElement = true;
+    }
+
+    boolean isArrayElement() {
+        return isArrayElement;
+    }
+
+    String getLocationName() {
+        return name;
+    }
+
+    int getLocationIndex() {
+        return index;
+    }
+}
+
 class CallExprNode extends ExpressionNode {
 
     CallExprNode(String name, int type) {
@@ -116,6 +149,21 @@ class BinopExprNode extends ExpressionNode {
 
 }
 
+class MinusExprNode extends ExpressionNode {
+
+
+    MinusExprNode() {
+        super("minum", MINUS);
+    }
+}
+
+class NotExprNode extends ExpressionNode {
+    
+    NotExprNode() {
+        super("not", NOT);
+    }
+}
+
 abstract class StatementNode extends ASTNode {
 
     StatementNode(String name, int type) {
@@ -129,21 +177,85 @@ abstract class StatementNode extends ASTNode {
 
 class AssignStmtNode extends StatementNode {
     
-    //private final IrLocation   lhs;
-    //private final IrExpression rhs;
+    private final int            assingOp;
+    private final LocationNode   lhs;
+    private final ExpressionNode rhs;
 
-    AssignStmtNode(String name, int type) {
-        super(name, type);
+    AssignStmtNode(int assignOp, LocationNode locationNode, ExpressionNode expressionNode) {
+        super("assign", ASSIGN_EXPR);
+
+        this.assignOp = assignOp;
+        this.lhs      = locationNode;
+        this.rhs      = expressionNode;
+    }
+
+//    void addLocation(LocationNode location) {
+//        this.lhs = location;
+//    }
+//
+//    void addExpression(Expression expr) {
+//        this.rhs = expr;
+//    }
+
+    int getAssignOp() {
+        return assignOp;
+    }
+
+    LocationNode getLocation() {
+        return lhs;
+    }
+
+    ExpressionNode getExpression() {
+        return rhs;
     }
 
 }
 
 class PlusAssignStmtNode extends StatementNode {
 
-    PlusAssignStmtNode(String name, int type) {
-        super(name, type);
+    private final LocationNode locationNode;
+    private final int increment;
+
+    PlusAssignStmtNode(LocationNode ln, int increment) {
+        super("plus_assign", PLUS_ASSIGN);
+
+        this.locationNode = ln;
+        this.increment    = increment;
     }
 
+//    void addLocation(LocationNode location) {
+//        this.location = location;
+//    }
+    
+    LocationNode getLocation() {
+        return locationNode;
+    }
+
+    int getIncrement() {
+        return increment;
+    }
+
+}
+
+abstract CallStmtNode extends StatementNode {
+
+    CallStmtNode(String name, int type) {
+        super(name, type);
+    }
+}
+
+class MethodCallStmtNode extends CallStmtNode {
+    
+    MethodCallStmtNode() {
+        super("methodCall", METHOD_CALL);
+    }
+}
+
+class CalloutStmtNode extends CallStmtNode {
+    
+    CalloutStmtNode() {
+        super("callout", METHOD_CALL);
+    }
 }
 
 class BreakStmtNode extends StatementNode {
@@ -193,46 +305,48 @@ abstract class MemberDeclNode extends ASTNode {
 //     ID
 class ImportDeclNode extends MemberDeclNode {
     
-    protected MethodDeclNode child;
+    private final String   exMethodName;
+    private final TypeNode typeNode;
 
-    ImportDeclNode() {
+    ImportDeclNode(String exMethodName) {
         super("import", TK_import);
-        this.child = child;
+        this.exMethodName = exMethodName;
+        this.typeNode     = new TypeNode("int", TK_int);
     }
 
-    void addChild(MethodDeclNode child) {
-        this.child = child;
+//    void addChild(MethodDeclNode child) {
+//        this.child = child;
+//
+//        // external method has no arg list and no statements 
+//        this.child.setExMethod();
+//    }
 
-        // external method has no statements 
-        this.child.nullStmt();
-    }
-
-    MethodDeclNode getChild() {
-        return child;
+    String getExMethod() {
+        return exMethodName;
     }
 
     void dump() {
         System.out.println("AST: import");
         System.out.printf("\t");
-        System.out.printf("AST: " + child);
+        System.out.printf("AST: " + exMethodName);
     }
 
 }
 
 class FieldDeclNode extends MemberDeclNode {
   
-    protected TypeNode typeNode;
-    protected ArrayList<VarDeclNode> varNodes;
+    private final TypeNode typeNode;
+    private final ArrayList<VarDeclNode> varNodes;
 
-    FieldDeclNode() {
+    FieldDeclNode(TypeNode typeNode) {
         super("field_decl", FIELD_DECL);
-
-        varNodes = new ArrayList<VarDeclNode>();
-    }
-
-    void addType(TypeNode typeNode) {
         this.typeNode = typeNode;
+        this.varNodes = new ArrayList<VarDeclNode>();
     }
+
+//    void addType(TypeNode typeNode) {
+//        this.typeNode = typeNode;
+//    }
 
     void addVar(VarDeclNode varNode) {
         varNodes.add(varNode);
@@ -257,53 +371,67 @@ class FieldDeclNode extends MemberDeclNode {
 
 class MethodDeclNode extends MemberDeclNode {
 
-    protected TypeNode typeNode;
-    protected ParaDeclNode paraDeclNode;
-    protected ArrayList<StatementNode> stmtNodes;
-    protected ArrayList<FieldDeclNode> localFieldDeclNodes;
-    protected boolean isExMethod;
+    private final  TypeNode typeNode;
+    private final  String methodName;
+    private final  ArrayList<ParaDeclNode> paraDeclNodes;
+    private final  ArrayList<StatementNode> stmtNodes;
+    private final  ArrayList<FieldDeclNode> localFieldDeclNodes;
 
-    protected String methodName;
 
-    MethodDeclNode() {
+    MethodDeclNode(TypeNode typeNode, String methodName) {
         super("method_decl", METHOD_DECL);
 
-        typeNode            = null;
-        paraDeclNode        = null;
-        stmtModes           = new ArrayList<StatementNode>();
-        localFieldDeclNodes = new ArrayList<FieldDeclNOde>();
-        isExMethod          = false;
+        this.typeNode            = typeNode;
+        this.methodName          = methodName
+        this.paraDeclNodes       = new ArrayList<ParaDeclNode>();
+        this.stmtModes           = new ArrayList<StatementNode>();
+        this.localFieldDeclNodes = new ArrayList<FieldDeclNOde>();
     }
 
-   void addType(TypeNode typeNode) {
-       this.typeNode = typeNode;
-   }
+//    void addType(TypeNode typeNode) {
+//        this.typeNode = typeNode;
+//    }
 
-   void setMethodName(String name) {
-       this.methodName = name;
-   }
+//    void setMethodName(String name) {
+//        this.methodName = name;
+//    }
 
-   void addPara(ParaDeclNode paraDeclNode) {
-       this.paraDeclNode = paraDeclNode;
-   }
+    void addPara(ParaDeclNode paraDeclNode) {
+        this.paraDeclNodes.add(paraDeclNode);
+    }
 
-   void addFieldDecl(FieldDeclNode fielDeclNode) {
-       this.localFieldDeclNodes.add(fieldDeclNode);
-   }
+    void addFieldDecl(FieldDeclNode fielDeclNode) {
+        this.localFieldDeclNodes.add(fieldDeclNode);
+    }
 
-   void addStmt(StatementNode stmtNode) {
-       this.stmtNodes.add(stmtNode);
-   }
+    void addStmt(StatementNode stmtNode) {
+        this.stmtNodes.add(stmtNode);
+    }
 
-   void setExMethod() {
-       stmtNodes           = null;
-       localFieldDeclNodes = null;
-       isExMethod          = true;
-   }
+    TypeNode getTypeNode() {
+        return typeNode;
+    }
 
-   boolean isExMethod() {
-       return isExMethod;
-   }
+    String getMethodName() {
+        return methodName;
+    }
+
+    ArrayList<ParaDeclNode> getParaDeclNodes() {
+        return paraDeclNodes;
+    }
+
+    ArrayList<StmtNodes> getStmtNodes() {
+        return statNodes;
+    }
+
+    ArrayList<FieldDeclNode> getLocalFieldDeclNodes() {
+        return localFieldDeclNodes;
+    }
+
+//    void setExMethod() {
+//        stmtNodes           = null;
+//        localFieldDeclNodes = null;
+//    }
 
 }
 
@@ -342,10 +470,10 @@ class VarDeclNode extends ASTNode {
 
 }
 
-class ParaDeclNode extends ASTNode {
+class ParaDeclNode extends MemberDeclNode {
 
-    protected ArrayList<TypeNode>    typeNodes;
-    protected ArrayList<VarDeclNode> varNodes;
+    private final TypeNode    typeNode;
+    private final VarDeclNode varNode;
 
     ParaDeclNode() {
         super("para_decl", FIELD_DECL);
@@ -354,20 +482,20 @@ class ParaDeclNode extends ASTNode {
         varNodes  = new ArrayList<VarDeclNode>();
     }
 
-    void addType(TypeNode typeNode) {
-        this.typeNodes.add(typeNode);
+//    void addType(TypeNode typeNode) {
+//        this.typeNodes.add(typeNode);
+//    }
+//
+//    void addVar(VarDeclNode varNode) {
+//        varNodes.add(varNode);
+//    }
+
+    TypeNode getTypeNode() {
+        return typeNode;
     }
 
-    void addVar(VarDeclNode varNode) {
-        varNodes.add(varNode);
-    }
-
-    ArrayList<TypeNode> getTypeNodes() {
-        return typeNodes;
-    }
-
-    ArrayList<VarDeclNode> getVarNodes() {
-        return varNodes;
+    VarNode getVarNode() {
+        return varNode;
     }
 
     void dump() {
@@ -381,8 +509,8 @@ class ParaDeclNode extends ASTNode {
 
 class TypeNode extends ASTNode {
 
-    TypeNode(String name) {
-        super(name, TYPE);
+    TypeNode(String name, int type) {
+        super(name, type);
     }
 
     void dump() {
@@ -393,25 +521,51 @@ class TypeNode extends ASTNode {
 
 class ProgramNode extends ASTNode {
 
-    ArrayList<ASTNode> children;
+    private final ArrayList<ImportDeclNode> importDeclNodes;
+    private final ArrayList<FieldDeclNode>  fieldDeclNodes;
+    private final ArrayList<MethodDeclNode> methodDeclNodes
 
     ProgramNode() {
         super("program", PROGRAM);
 
-        children = new ArrayList<ASTNode>();
+        importDeclNodes = new ArrayList<ImportDeclNode>();
+        fieldDeclNodes  = new ArrayList<FieldDeclNode>();
+        methodDeclNode  = new ArrayList<MethodDeclNode>();
     }
 
-    void addChild(ASTNode child) {
-        children.add(child);
+    void addImportDecl(ImportDeclNode idn) {
+        importDeclNodes.add(idn);
     }
 
-    ArrayList<ASTNode> getChildren() {
-        return children;
+    void addFieldDeclNode(FieldDeclNode fdn) {
+        fieldDeclNodes.add(fdn);
+    }
+
+    void addMethodDeclNode(MethodDeclNode mdn) {
+        methodDeclNode.add(mdn);
+    }
+
+    ArrayList<ImportDeclNode> getImportDeclNodes() {
+        return importDeclNodes;
+    }
+
+    ArrayList<FieldDeclNode> getFieldDeclNodes() {
+        return fieldDeclNodes;
+    }
+
+    ArrayList<MethodDeclNode> getMethodDeclNodes() {
+        return methodDeclNodes;
     }
 
     void dump() {
-        for(ASTNode astNode: children) {
-            astNode.dump();
+        for(ImportDeclNode idn: importDeclNodes) {
+            idn.dump();
+        }
+        for(FieldDeclNode fdn: fieldDeclNodes) {
+            fdn.dump();
+        }
+        for(MethodDeclNode mdn: methodDeclNodes) {
+            mdn.dump();
         }
     }
 }

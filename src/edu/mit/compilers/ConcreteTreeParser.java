@@ -97,22 +97,16 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         while(cstChild.getText() != null) {
             switch(cstChild.getType()) {
                 case IMPORT_DECL: 
-
                     ImportDeclNode importDeclNode = importDecl(cstChild);
-                    root.addChild(astChild);
-
+                    root.addChild(importDeclNode);
                     break;
                 case FIELD_DECL:
-
                     FieldDeclNode fieldDeclNode = fieldDecl(cstChild);
                     root.addChild(fieldDeclNode);
-
                     break;
                 case METHOD_DECL:
-
                     MethodDeclNode methodDeclNode = methodDecl(cstChild);
                     root.addChild(methodDeclNode);
-
                     break;
             }
             cstChild = cstChild.getNextSibling();
@@ -122,7 +116,8 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         // root.dump();
     }
 
-    void importDecl(AST cstNode) {
+    ImportDeclNode importDecl(AST cstNode) {
+        // "import_decl"
         traceIn(cstNode);
 
         // CST node
@@ -130,73 +125,66 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         // walk on CST tree 
         // collect necessary info and build AST
-        while(childNode != null) {
-            traceIn(childNode);
-            traceOut(null);
+        childNode = childNode.getNextSibling();
 
-            if(childNode.getType() == ID) {
-                MethodDeclNode exMethod   = new MethodDeclNode();
-                importDeclNode.addChild(exMethod);
-
-                TypeNode methodType   = new TypeNode("int");
-                ParaDeclNode paraDecl = new ParaDeclNode();
-                exMethod.addType(methodType);
-                exMethod.setExMethod();
-            }
-
-            childNode = childNode.getNextSibling();
-        }
+        // AST node
+        ImportDeclNode importDeclNode = new ImportDeclNode(childNode.getText())
 
         traceOut(importDeclNode); 
+        return importDeclNode;
     }
 
-    void fieldDecl(AST cstNode, FieldDeclNode fieldDeclNode) {
+    FieldDeclNode fieldDecl(AST cstNode) {
+        // "field_decl"
         traceIn(cstNode);
 
         // AST node
-        TypeNode       typeNode;
-        VarDeclNode    varNode;
-        IntLiteralNode width;
+        FieldDeclNode  fieldDeclNode;
 
         // CST node
         AST childNode   = cstNode.getFirstChild();
 
         // walk on CST tree 
         // collect necessary info and build AST
-        while(childNode != null) {
-            // recursive call and print cst
-            switch(childNode.getType()) {
-                case TYPE:
-                    TypeNode typeNode = new TypeNode(childNode.getText());
-                    fieldDeclNode.addType(typeNode);
-                    type(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            
+        
+        // first child is type
+        AST grandChild = child.getFristChild();
+        TypeNode typeNode = new TypeNode(grandChild.getText(), grandChild.getType());
+        type(childNode);
+
+        // crate AST node
+        fieldDeclNode = new FieldDeclNode(typeNode);
+
+        // var declarations
+        childNode   = childNode.getNextSibling();
+        while(childNode.getType() != null) {
             // check if is array
             if(childNode.getNextSibling() != null && 
                childNode.getNextSibling().getType() == INTLITERAL) {
 
                // create IntLiteralNode
-               width   = new IntLiteralNode(childNode.getNextSibling().getText());
-               varNode = new VarDeclNode(childNode.getText(), width); 
+               IntLiteralNode width   = new IntLiteralNode(childNode.getNextSibling().getText());
+               VarNode varNode = new VarDeclNode(childNode.getText(), width); 
                fieldDeclNode.addVar(varNode);
 
             } else {
                varNode = new VarDeclNode(childNode.getText()); 
                fieldDeclNode.addVar(varNode);
             }
-            childNode = childNode.getNextSibling();
+            childNode   = childNode.getNextSibling();
         }
 
+
         traceOut(fieldDeclNode); 
+        return fieldDeclNode;
     }
 
-    void methodDecl(AST cstNode, MethodDeclNode methodDeclNode) {
+    MethodDeclNode methodDecl(AST cstNode) {
+        // "method_decl"
         traceIn(cstNode);
+
+        // AST node
+        MethodDeclNode methodDeclNode;
 
         // CST node
         AST childNode  = cstNode.getFirstChild();
@@ -210,39 +198,54 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         if(childNode.getType() == TYPE) {
             TypeNode typeNode = new TypeNode(childNode.getText());
             methodDeclNode.addType(typeNode);
+        } else {
+            TypeNode typeNode = null;
         }
-        childNode = childNode.getNextSibling();
 
         // method name
-        methodDeclNode.setMethodName(childNode.getText());
-        childNode = childNode.getNextSibling();
+        childNode      = childNode.getNextSibling();
+
+        // create AST node
+        methodDeclNode = new MethodDeclNode(typeNode, childNode.getText());
 
         // parameter declaration
-        ParaDeclNode paraDeclNode = new ParaDeclNode();
-        methodDeclNode.addPara(paraDeclNode);
-
-        while(childNode != null) {
+        childNode = childNode.getNextSibling();
+        while(childNode.getType() != BLOCK) {
             switch(childNode.getType()) {
                 case TYPE:
-                    TypeNode paraType = new TypeNode(childNode.getText());
-                    paraDeclNode.addType(paraType);
+                    TypeNode paraType   = new TypeNode(childNode.getText());
+                    VarDeclNode paraVar = new VarDeclNode(childNode.getNextSibling().getText());
+                    ParaDeclNode paraDeclNode = new ParaDeclNode(paraType, paraVar);
+                    methodDeclNode.addPara(paraDeclNode);
                     type(childNode);
-                    break;
-                case BLOCK:
-                    block(childNode, methodDeclNode);
                     break;
                 // ID token
                 default:
-                    VarDeclNode paraVar = new VarDeclNode(childNode.getText());
-                    paraDeclNode.addVar(paraVar);
-           
                     traceIn(childNode);
                     traceOut(null);
             }
             childNode = childNode.getNextSibling();
         }
 
+        // block 
+        // block(childNode, methodDeclNode);
+        grandChildNode = childNode.getFirstChild();
+        while(grandChildNode != null) {
+            switch(grandChildNode.getType()) {
+                case FIELD_DECL:
+                    FieldDeclNode fieldDeclNode = fieldDecl(cstChild);
+                    methodDeclNode.addFieldDecl(fieldDeclNode);
+                    break;
+                case STATEMENT:
+                    StatementNode stmtNode = statement(grandChild);
+                    methodDeclNode.addStmt(stmtNode);
+                    break;
+            }
+            grandChildNode = grandChildNode.getNextSibling();
+        }
+
         traceOut(methodDeclNode); 
+        return methodDeclNode;
     }
 
     void type(AST cstNode) {
@@ -256,114 +259,183 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         traceOut(null); 
     }
 
-    void block(AST cstNode, ASTNode astNode) {
+    StatementNode statement(AST cstNode) {
+        // "statement"
         traceIn(cstNode);
-
-        if(astNode instanceof fieldDeclNode) {
-            FieldDeclNode localASTNode = (FieldDeclNode) astNode; 
-        } else {
-            StatementNode localASTNode = (StatementNode) astNode;
-        }
-
-        // CST node
-        AST childNode = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case FIELD_DECL:
-                    FieldDeclNode fDeclN = new FieldDeclNode();
-                    localASTNode.addFieldDecl(fDeclN);
-                    fieldDecl(childNode, fDeclN);
-                    break;
-                case STATEMENT:
-                    statement(childNode, localASTNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-    }
-
-    void statement(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        if(astNode instanceof fieldDeclNode) {
-            FieldDeclNode localASTNode = (FieldDeclNode) astNode; 
-        } else {
-            StatementNode localASTNode = (StatementNode) astNode;
-        }
 
         // CST node
         AST childNode   = cstNode.getFirstChild();
 
         switch(childNode.getType()) {
-            //case LOCATION:
-            //    location(childNode);
-            //    break;
-            //case ASSIGN_EXPR:
-            //    assignExpr(childNode);
-            //    break;
-            //case METHOD_CALL:
-            //    methodCall(childNode);
-            //    break;
-            //case EXPR:
-            //    expr(childNode);
-            //    break;
-            //case BLOCK:
-            //    block(childNode);
-            //    break;
-            //case COMPOUND_ASSIGN_OP:
-            //    compoundAssignOp(childNode);
-            //    break;
-            //case INCREMENT:
-            //    increment(childNode);
-            //    break;
-            //default:
-            //    traceIn(childNode);
-            //    traceOut(null);
-            
             case LOCATION:
-                location(childNode, locatASTNode);
-                break;
+                if(childNode.getNextSibling().getFirstChild().getType() == ASSIGN_OP) {
+                    return assign(childNode);
+                } else {
+                    return plusAssign(childNode);
+                }
             case METHOD_CALL:
-                methodCall(childNode, locatASTNode);
-                break;
+                return callStmt(childNode);
             case TK_if:
-                IfStmtNode ifStmtNode = new IfStmtNode();
-                localASTNode.addChild(ifStmtNode);
-                ifStmt(childNode, ifStmtNode);
-                break;
+                return = ifStmt(childNode);
             case TK_for:
-                ForStmtNode forStmtNode = new ForStmtNode();
-                localASTNode.addChild(forStmtNode);
-                forStmt(childNode, forStmtNode);
-                break;
+                return forStmt(childNode);
             case TK_while:
-                WhildStmtNode whileStmtNode = new WhileStmtNode();
-                localASTNode.addChild(whileStmtNode);
-                whileStmt(childNode, whileStmtNode);
-                break;
+                return whileStmt(childNode);
             case TK_break:
-                BreakStmtNode breakStmtNode = new BreakStmtNode();
-                localASTNode.addChild(breakStmtNode);
-                breakStmt(childNode, breakStmtNode);
-                break;
+                return breakStmt(childNode);
             case TK_continue:
-                ContinueStmtNode continueStmtNode = new ContinueStmtNode();
-                localASTNode.addChild(continueStmtNode);
-                returnStmt(childNode, continueStmtNode);
-                break;
+                return returnStmt(childNode);
+        }
+
+        traceOut(null); 
+    }
+
+    AssignStmtNode assign(AST locationCST) {
+        // "location"
+        traceIn(locationCST);
+
+        // AST
+        AssignStmtNode assignStmtNode; 
+
+        // CST
+        AST assignOpCST   = locationCST.getNextSibling().getFirstChild();
+        AST assignExprCST = assignOpCST.getNextSibling();
+
+        // AST location node
+        if(locationCST.getNumberOfChildren() == 1) {
+            // scalar
+            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText());
+        } else {
+            // array element
+            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText(),
+                                            locationCST.getFirstChild().getNextSibling().getText());
+        }
+
+        // assignOp
+        int assignOp;
+        if(assignOpCST.getFirstChild().getType == EQ) {
+            assignOp = EQ;
+        } else {
+            assignOpCST = assignOpCST.getFirstChild();
+            assignOp    = assignOpCST.getType(); 
+        }
+
+        // assignExpr
+        ExpressionNode assignExprNode = expr(assignExprCST);
+        
+        // build AST
+        assignStmtNode = new AssignStmtNode(assignOp, locationNode, assignExprNode);
+
+        traceOut(null); 
+        return assignStmtNode;
+    }
+
+    PlusAssignStmtNode plusAssign(AST locationCST) {
+        // "location"
+        traceIn(locationCST);
+
+        // AST
+        PlusAssignStmtNode plusAssignStmtNode;
+
+        // CST
+        AST incrementCST = locationCST.getNextSibling().getFirstChild();  
+      
+        // AST location node
+        if(locationCST.getNumberOfChildren() == 1) {
+            // scalar
+            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText());
+        } else {
+            // array element
+            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText(),
+                                            locationCST.getFirstChild().getNextSibling().getText());
+        }
+
+        int increment = incrementCST.getFristChild.getType();
+        plusAssignStmtNode = new PlusAssignStmtNode(locationNode, increment);
+        traceOut(null); 
+        return plusAssignStmtNode;
+    }
+
+    CallStmtNode callStmt(AST cstNode) {
+        // cst: "method_call" node
+        traceIn(cstNode);
+
+        AST childNode   = cstNode.getFirstChild();
+
+        if(childNode.getNextSibling().getType() == EXPR) {
+            return methodCallStmt(childNode);
+        } else {
+            return calloutStmt(childNode);
         }
 
         traceOut(null); 
         //return astNode;
     }
 
-    void location(AST cstNode, ASTNode astNode) {
+    MethodCallStmtNode methodCallStmt(AST methodName) {
+        // cst: "method_name" node
+        traceIn(cstNode);
+        
+        // CST
+        AST callExpr = methodName.getNextSibling();
+
+
+    }
+
+    CalloutStmtNode calloutStmtNode(AST methodName) {
+        // cst: "method_name" node
+        traceIn(cstNode);
+
+    }
+
+    IfStmtNode ifStmt(AST cst) {
+    }
+
+    ForStmtNode forStmt(AST cst) {
+    }
+
+    WhileStmtNode whildStmt(AST cst) {
+    }
+
+    BreakStmtNode breakStmt(AST cst) {
+    }
+
+    ReturnStmtNode returnStmt(AST cst) {
+    }
+
+    ExpressionNode expr(AST cstNode) {
+        traceIn(cstNode);
+
+        //ASTNode astNode = null;
+        AST childNode   = cstNode.getFirstChild();
+
+        switch(childNode.getType()) {
+            case LOCATION:
+                return locationExpr(childNode);
+            case METHOD_CALL:
+                return methodCallExpr(childNode);
+            case LITERAL:
+                literalExpr(childNode);
+            case EXPR:
+                expr(childNode);
+            case BIN_OP:
+                binOpExpr(childNode);
+            case MINUS:
+                minusExpr(childNode);
+            case NOT:
+                notExpr(childNode);
+            case TK_len:
+                lenExpr(childNode);
+            default:
+                traceIn(childNode);
+                traceOut(null);
+        }
+
+        traceOut(null); 
+        //return astNode;
+    }
+
+    LocationExprNode locationExpr(AST cstNode) {
         traceIn(cstNode);
 
         //ASTNode astNode = null;
@@ -384,28 +456,18 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         traceOut(null); 
     }
 
-    void expr(AST cstNode, ASTNode astNode) {
+    MethodCallExprNode methodCallExpr(AST cst) {
+    }
+
+    LiteralExprNode literalExpr(AST cstNode) {
         traceIn(cstNode);
 
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
+        AST childNode = cstNode.getFirstChild();
 
         while(childNode != null) {
             switch(childNode.getType()) {
-                case LOCATION:
-                    location(childNode);
-                    break;
-                case METHOD_CALL:
-                    methodCall(childNode);
-                    break;
-                case LITERAL:
-                    literal(childNode);
-                    break;
-                case EXPR:
-                    expr(childNode);
-                    break;
-                case BIN_OP:
-                    binOp(childNode);
+                case BOOL_LITERAL:
+                    boolLiteral(childNode);
                     break;
                 default:
                     traceIn(childNode);
@@ -418,133 +480,20 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         //return astNode;
     }
 
-    ASTNode assignExpr(AST cstNode, ASTNode astNode) {
+    BinOpExprNode binOpExpr(AST cstNode) {
         traceIn(cstNode);
 
         //ASTNode astNode = null;
         AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case ASSIGN_OP:
-                    assignOp(childNode);
-                    break;
-                case EXPR:
-                    expr(childNode);
-                    break;
-                case INCREMENT:
-                    increment(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
 
         traceOut(null); 
         //return astNode;
     }
 
-    void assignOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case COMPOUND_ASSIGN_OP:
-                    compoundAssignOp(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
+    MinusExprNode minusExpr(AST cst) {
     }
 
-    void compoundAssignOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void increment(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void methodCall(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case METHOD_NAME:
-                    methodName(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void methodName(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
+    NotExprNode notExpr(AST cst) {
     }
 
     void importArg(AST cstNode, ASTNode astNode) {
@@ -569,36 +518,6 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         //return astNode;
     }
 
-    void binOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case ARITH_OP:
-                    arithOp(childNode);
-                    break;
-                case REL_OP:
-                    relOp(childNode);
-                    break;
-                case EQ_OP:
-                    eqOp(childNode);
-                    break;
-                case COND_OP:
-                    condOp(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
 
     void arithOp(AST cstNode, ASTNode astNode) {
         traceIn(cstNode);
@@ -665,28 +584,6 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         while(childNode != null) {
             switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void literal(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case BOOL_LITERAL:
-                    boolLiteral(childNode);
-                    break;
                 default:
                     traceIn(childNode);
                     traceOut(null);

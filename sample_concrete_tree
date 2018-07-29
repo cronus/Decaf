@@ -9,7 +9,8 @@
         import 
         printf ) 
     ( field_decl 
-        ( type int ) 
+        ( type 
+            int ) 
         A 
         100 ) 
     ( field_decl ( type int ) length ) 
