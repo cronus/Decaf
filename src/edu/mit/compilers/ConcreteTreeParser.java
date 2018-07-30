@@ -302,14 +302,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         AST assignExprCST = assignOpCST.getNextSibling();
 
         // AST location node
-        if(locationCST.getNumberOfChildren() == 1) {
-            // scalar
-            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText());
-        } else {
-            // array element
-            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText(),
-                                            locationCST.getFirstChild().getNextSibling().getText());
-        }
+        LocationNode locationNode = location(locationCST);
 
         // assignOp
         int assignOp;
@@ -341,14 +334,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         AST incrementCST = locationCST.getNextSibling().getFirstChild();  
       
         // AST location node
-        if(locationCST.getNumberOfChildren() == 1) {
-            // scalar
-            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText());
-        } else {
-            // array element
-            LocationNode locationNode = new LocationNode(locationCST.getFirstChild().getText(),
-                                            locationCST.getFirstChild().getNextSibling().getText());
-        }
+        LocationNode locationNode = location(locationCST);
 
         int increment = incrementCST.getFristChild.getType();
         plusAssignStmtNode = new PlusAssignStmtNode(locationNode, increment);
@@ -498,47 +484,139 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     ForStmtNode forStmt(AST cst) {
         // "for"
         traceIn(cstNode);
+
+        // AST
+        ForStmtNode forStmtNode;
+
+        // CST
+        AST intialIDCST      = cst.getNextSibling();
+        AST initialExprCST   = initialIDCST.getNextSibling().getNextSibling();
+        AST contitionExprCST = initialExprCST.getNextSibling();
+        AST locationCST      = conditionExprCST.getNextSibling();
+        AST blockCST;
+
+        String initialID                  = initialIDCST.getText();
+        ExpressionNode initialExprNode    = expr(intitalExprCST);
+        ExpressionNode conditionNode      = expr(conditionExprCST);
+        LocationNOde   updateLocationNode = location(locationCST);
+
+        if(locationCST.getNextSibling().getType() == COMPOUND_ASSIGN_OP) {
+            AST compoundAssignOpCST = locationCST.getNextSibling();
+            AST updateExprCST       = compoundAssignOp.getNextSibling();
+            blockCST                = updateExprCST.getNextSibling();
+            ExpressionNode updatExprNode = expr(updateExprCST);
+            forStmtNode = new ForStmtNode(initialID, initialExprNode, conditionNode,
+                                          updateLocationNode, 
+                                          compoundAssignOpCST.getFirstChild().getType(),
+                                          updateExprNode);
+        } else {
+            AST incrementCST = locationCST.getNextSibling();
+            blockCST         = incrementCST.getNextSibling();
+            forStmtNode = new ForStmtNode(initialID, initialExprNode, conditionNode,
+                                          updateLocationNode, 
+                                          increment.getFirstChild().getType());
+        }
+
+        // block
+        AST blockChild = blockCST.getFirstChild();
+        while(blockChild != null) {
+            switch(blockChild.getType()) {
+                case FIELD_DECL:
+                    FieldDeclNode fieldDeclNode = fieldDecl(blockChild);
+                    forStmtNode.addFFieldDecl(fieldDeclNode);
+                    break;
+                case STATEMENT:
+                    StatementNode stmtNode = statement(blockChild);
+                    forStmtNode.addFStmt(stmtNode);
+                    break;
+            }
+            blockChild = blockChild.getNextSibling();
+        }
+        return forStmtNode;
+
     }
 
-    WhileStmtNode whildStmt(AST cst) {
+    WhileStmtNode whileStmt(AST cst) {
         // "while"
-        traceIn(cstNode);
+        traceIn(cst);
+
+        // AST
+        WhileStmeNode whileStmtNode;
+
+        // CST
+        AST conditionCST = cst.getNextSibling();
+        AST blockCST     = conditionCST.getNextSibling();
+
+        ExpressionNode conditionNode = expr(conditionCST);
+
+        whileStmeNode = new whildStmtNode(conditionNode);
+
+        AST blockChild = blockCST.getFirstChild();
+        while(blockChild != null) {
+            switch(blockChild.getType()) {
+                case FIELD_DECL:
+                    FieldDeclNode fieldDeclNode = fieldDecl(blockChild);
+                    whileStmtNode.addFFieldDecl(fieldDeclNode);
+                    break;
+                case STATEMENT:
+                    StatementNode stmtNode = statement(blockChild);
+                    whileStmtNode.addFStmt(stmtNode);
+                    break;
+            }
+            blockChild = blockChild.getNextSibling();
+        }
+        return forStmtNode;
     }
 
     BreakStmtNode breakStmt(AST cst) {
         // "break"
         traceIn(cstNode);
+
+        return new BreakStmtNode();
     }
 
     ReturnStmtNode returnStmt(AST cst) {
         // "return"
         traceIn(cstNode);
+
+        // AST
+        ReturnStmtNode returnNode;
+
+        if(cst.getNextSibling() == null) {
+            returnNode = new ReturnNode(null);    
+        } else {
+            AST returnExprCST = cst.getNextSibling();
+            ExpressionNode returnExprNode = expr(returnExprCST);
+            returnNode = new Return(returnExprNode);
+        }
+
+        return returnNode;
     }
 
-    ExpressionNode expr(AST cstNode) {
+    ExpressionNode expr(AST cst) {
         // "expr"
-        traceIn(cstNode);
+        traceIn(cst);
 
         //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
+        AST childNode = cst.getFirstChild();
 
         switch(childNode.getType()) {
             case LOCATION:
-                return locationExpr(childNode);
+                return location(childNode);
             case METHOD_CALL:
                 return methodCallExpr(childNode);
             case LITERAL:
-                literalExpr(childNode);
+                return literalExpr(childNode);
             case EXPR:
-                expr(childNode);
+                return expr(childNode);
             case BIN_OP:
-                binOpExpr(childNode);
+                return binOpExpr(childNode);
             case MINUS:
-                minusExpr(childNode);
+                return minusExpr(childNode);
             case NOT:
-                notExpr(childNode);
+                return notExpr(childNode);
             case TK_len:
-                lenExpr(childNode);
+                return lenExpr(childNode);
             default:
                 traceIn(childNode);
                 traceOut(null);
@@ -548,25 +626,24 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         //return astNode;
     }
 
-    LocationExprNode locationExpr(AST cstNode) {
+    LocationNode location(AST cstNode) {
+        // "location"
         traceIn(cstNode);
 
-        //ASTNode astNode = null;
+        // AST
+        Location locationNode;
+        
+        // CST
         AST childNode   = cstNode.getFirstChild();
 
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case EXPR:
-                    expr(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
+        if(cstNode.getNumberOfChildren == 1) {
+            locationNode = new LocationNOde(childNode.getText());
+        } else {
+            locationNode = new LocationNode(childNode.getText(), childNode.getNextSibling().getText());
         }
 
         traceOut(null); 
+        return locationNode;
     }
 
     MethodCallExprNode methodCallExpr(AST cst) {

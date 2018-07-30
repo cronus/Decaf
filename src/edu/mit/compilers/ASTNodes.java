@@ -164,6 +164,13 @@ class NotExprNode extends ExpressionNode {
     }
 }
 
+class LenExprNode extends ExpressionNode {
+    
+    LenExprNode() {
+        super("len", TK_len);
+    }
+}
+
 abstract class StatementNode extends ASTNode {
 
     StatementNode(String name, int type) {
@@ -237,7 +244,7 @@ class PlusAssignStmtNode extends StatementNode {
 
 }
 
-abstract CallStmtNode extends StatementNode {
+abstract class CallStmtNode extends StatementNode {
 
     CallStmtNode(String name, int type) {
         super(name, type);
@@ -330,13 +337,79 @@ class IfStmtNode extends StatementNode {
 
 class ForStmtNode extends StatementNode {
 
-    private final String idName;
-    private final Expre
+    private final String initialID;
+    private final ExpressionNode initialExpr;
+    private final ExpressionNode conditionExpr;
+    private final LocationNode   updateLocation;
+    private final int compoundAssignOp;
+    private final ExpressionNode updateExpr;
+    private final int increment;
+    private final ArrayList<FieldDeclNode> fieldDeclNodes;
+    private final ArrayList<StatementNode> stmtNodes;
 
-    ForStmtNode() {
+    ForStmtNode(String initialID, ExpressionNode initialExpr, 
+                ExpressionNode conditionExpr, LocationNode updateLocation,
+                int compoundAssignOp, Expression updateExpr) {
         super("for", TK_for);
+
+        this.initialID        = initialID;
+        this.initialExpr      = initialExpr;
+        this.conditionExpr    = conditionExpr;
+        this.updateLocation   = updateLocation;
+        this.compoundAssignOP = compoundAssignOp;
+        this.updateExpr       = updateExpr;
+        this.increment        = -1;
+        fieldDeclNodes = new ArrayList<FieldDeclNode>;
+        stmtNodes      = new ArrayList<StatementNode>;
     }
 
+    ForStmtNode(String initialID, ExpressionNode initialExpr, 
+                ExpressionNode conditionExpr, LocationNode updateLocation,
+                int increment) {
+        super("for", TK_for);
+
+        this.initialID        = initialID;
+        this.initialExpr      = initialExpr;
+        this.conditionExpr    = conditionExpr;
+        this.updateLocation   = updateLocation;
+        this.increment        = increment;
+        this.compoundAssignOp = -1;
+        this.updateExpr       = null;
+        fieldDeclNodes = new ArrayList<FieldDeclNode>;
+        stmtNodes      = new ArrayList<StatementNode>;
+    }
+
+    void addField(FieldDeclNode fn) {
+        fieldDeclNodes.add(fn);
+    }
+
+    void addStmt(StatementNode sn) {
+        stmtNodes.add(sn);
+    }
+
+}
+
+class WhileStmtNode extends StatementNode {
+
+    private final ExpressionNode conditionExpr;
+    private final ArrayList<FieldDeclNode> fieldDeclNodes;
+    private final ArrayList<StatementNode> stmtNodes;
+
+    WhileStmtNode(ExpressionNode conditionExpr) {
+        super("while", TK_while);
+
+        this.conditionExpr  = conditionExpr;
+        this.fieldDeclNodes = new ArrayList<FieldDeclNode>();
+        this.stmtNodes      = new ArrayList<StatementNode>();
+    }
+
+    void addField(FieldDeclNode fn) {
+        fieldDeclNodes.add(fn);
+    }
+
+    void addStmt(StatementNode sn) {
+        stmtNodes.add(sn);
+    }
 }
 
 class BreakStmtNode extends StatementNode {
@@ -344,15 +417,17 @@ class BreakStmtNode extends StatementNode {
     BreakStmtNode() {
         super("break", TK_break);
     }
-
 }
 
-class WhileStmtNode extends StatementNode {
+class ReturnStmtNode extends StatementNode {
+ 
+    private final ExpressionNode expr;
+ 
+    ReturnStmtNode(ExpressionNode expr) {
+        super("return", TK_return);
 
-    WhileStmtNode() {
-        super("while", TK_while);
+        this.expr = expr;
     }
-
 }
 
 abstract class MemberDeclNode extends ASTNode {
