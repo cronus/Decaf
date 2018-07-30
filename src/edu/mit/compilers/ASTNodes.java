@@ -123,28 +123,56 @@ class CallExprNode extends ExpressionNode {
 
 class MethodCallExprNode extends CallExprNode {
 
-    MethodCallExprNode(String name, int type) {
-        super(name, type);
+    private final String methodName;
+    private final ArrayList<ExpressionNode> expressionNodes;
+    
+    MethodCallExprNode(String methodName) {
+        super("methodCall", METHOD_CALL);
+
+        this.methodName      = methodName;
+        this.expressionNodes = new ArrayList<ExpressionNode>();
     }
 
+    void addExpr(ExpressionNode expr) {
+        expressionNodes.add(expr);
+    }
+
+    String getMethodName() {
+        return methodName;
+    }
+
+    ArrayList<ExpressionNode> getExpressionNodes() {
+        return expressionNodes;
+    }
 }
 
 class CalloutExprNode extends CallExprNode {
 
-    CalloutExprNode(String name, int type) {
-        super(name, type);
+    private final String methodName;
+    
+    CalloutExprNode(String methodName) {
+        super("callout", METHOD_CALL);
+
+        this.methodName = methodName;
     }
 
+    String getMethodName() {
+        return methodName;
+    }
 }
 
 class BinopExprNode extends ExpressionNode {
 
-    //private final int          operator;
-    //private final IrExpression lhs;
-    //private final IrExpression rhs;
+    private final int          operator;
+    private final ExpressionNode lhs;
+    private final ExpressionNode rhs;
 
-    BinopExprNode(String name, int type) {
-        super(name, type);
+    BinopExprNode(int operator, ExpressionNode lhs, ExpressionNode rhs) {
+        super("bin_op", BIN_OP);
+
+        this.operator = operator;
+        this.lhs      = lhs;
+        this.rhs      = rhs;
     }
 
 }

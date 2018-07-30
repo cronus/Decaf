@@ -604,7 +604,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             case LOCATION:
                 return location(childNode);
             case METHOD_CALL:
-                return methodCallExpr(childNode);
+                return callExpr(childNode);
             case LITERAL:
                 return literalExpr(childNode);
             case EXPR:
@@ -646,28 +646,66 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         return locationNode;
     }
 
-    MethodCallExprNode methodCallExpr(AST cst) {
-    }
-
-    LiteralExprNode literalExpr(AST cstNode) {
+    CallExprNode callExpr(AST cstNode) {
+        // cst: "method_call" node
         traceIn(cstNode);
 
-        AST childNode = cstNode.getFirstChild();
+        // CST
+        AST childNode   = cstNode.getFirstChild();
 
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case BOOL_LITERAL:
-                    boolLiteral(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
+        String methodName = childNode.getFirstChild().getText();
+        HashMap<String, MethodDescriptor> methodST = pgmDesc.getMethodST();
+
+        if(methodST.contains(methodName)) {
+            return methodCallExpr(childNode);
+        } else {
+            return calloutExpr(childNode);
         }
 
         traceOut(null); 
         //return astNode;
+    }
+
+    MethodCallExprNode methodCallExpr(AST methodName) {
+        // cst: "method_name" node
+        traceIn(cstNode);
+        
+        // AST
+        MethodCallExprNode = methodCallExprNode;
+
+        String name;
+        name = methodName.getText();
+        methodCallExprNode = new MethodCallExprNode(name);
+
+        // CST
+        // expression list
+        AST callExpr = methodName.getNextSibling().getFirstChild();
+
+        while(callExpr != null) {
+
+            ExpressionNode exprCall = expr(callNode);
+            methodCallExprNode.addExpr(exprCall);
+            callExpr = callExpr.getNextSibling();
+        }
+
+        return methodCallStmt;
+    }
+
+    CalloutExprNode calloutExprNode(AST methodName) {
+        // cst: "method_name" node
+        traceIn(cstNode);
+
+        // AST
+        CalloutStmtNode calloutExprNode;
+        String name;
+
+        name = methodName.getText();
+        calloutExprNode = new CalloutStmtNode(name);
+
+        // CST
+        //AST callExpr = methodName.getNextSibling().getFirstChild();
+
+        return calloutExprNode;
     }
 
     BinOpExprNode binOpExpr(AST cstNode) {
