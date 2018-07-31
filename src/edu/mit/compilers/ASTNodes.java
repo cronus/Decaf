@@ -80,7 +80,7 @@ class BoolLiteralNode extends LiteralNode {
     private final boolean value;
 
     BoolLiteralNode(boolean value) {
-        super("bool_literal", BOOLLITERAL);
+        super("bool_literal", BOOL_LITERAL);
 
         this.value = value;
     }
@@ -219,7 +219,7 @@ class NotExprNode extends ExpressionNode {
 
     private final ExpressionNode expr;
     
-    NotExprNode() {
+    NotExprNode(ExpressionNode expr) {
         super("not", NOT);
 
         this.expr = expr;
@@ -245,7 +245,7 @@ class TenaryExprNode extends ExpressionNode {
     TenaryExprNode(ExpressionNode conditionExprNode,
                    ExpressionNode trueExprNode,
                    ExpressionNode falseExprNode) {
-        super("tenary", TENARY);
+        super("tenary", QUESTION);
 
         this.conditionExprNode = conditionExprNode;
         this.trueExprNode      = trueExprNode;
@@ -268,7 +268,7 @@ abstract class StatementNode extends ASTNode {
 
 class AssignStmtNode extends StatementNode {
     
-    private final int            assingOp;
+    private final int            assignOp;
     private final LocationNode   lhs;
     private final ExpressionNode rhs;
 
@@ -384,7 +384,7 @@ class IfStmtNode extends StatementNode {
     private final ArrayList<StatementNode> fStmtNodes;
     private final boolean haveElse;
     
-    IfStmtNode(Expression condition, boolean haveElse) {
+    IfStmtNode(ExpressionNode condition, boolean haveElse) {
         super("if", TK_if);
 
         this.condition = condition;
@@ -433,18 +433,18 @@ class ForStmtNode extends StatementNode {
 
     ForStmtNode(String initialID, ExpressionNode initialExpr, 
                 ExpressionNode conditionExpr, LocationNode updateLocation,
-                int compoundAssignOp, Expression updateExpr) {
+                int compoundAssignOp, ExpressionNode updateExpr) {
         super("for", TK_for);
 
         this.initialID        = initialID;
         this.initialExpr      = initialExpr;
         this.conditionExpr    = conditionExpr;
         this.updateLocation   = updateLocation;
-        this.compoundAssignOP = compoundAssignOp;
+        this.compoundAssignOp = compoundAssignOp;
         this.updateExpr       = updateExpr;
         this.increment        = -1;
-        fieldDeclNodes = new ArrayList<FieldDeclNode>;
-        stmtNodes      = new ArrayList<StatementNode>;
+        this.fieldDeclNodes   = new ArrayList<FieldDeclNode>();
+        this.stmtNodes        = new ArrayList<StatementNode>();
     }
 
     ForStmtNode(String initialID, ExpressionNode initialExpr, 
@@ -459,8 +459,8 @@ class ForStmtNode extends StatementNode {
         this.increment        = increment;
         this.compoundAssignOp = -1;
         this.updateExpr       = null;
-        fieldDeclNodes = new ArrayList<FieldDeclNode>;
-        stmtNodes      = new ArrayList<StatementNode>;
+        this.fieldDeclNodes   = new ArrayList<FieldDeclNode>();
+        this.stmtNodes        = new ArrayList<StatementNode>();
     }
 
     void addField(FieldDeclNode fn) {
@@ -606,10 +606,10 @@ class MethodDeclNode extends MemberDeclNode {
         super("method_decl", METHOD_DECL);
 
         this.typeNode            = typeNode;
-        this.methodName          = methodName
+        this.methodName          = methodName;
         this.paraDeclNodes       = new ArrayList<ParaDeclNode>();
-        this.stmtModes           = new ArrayList<StatementNode>();
-        this.localFieldDeclNodes = new ArrayList<FieldDeclNOde>();
+        this.stmtNodes           = new ArrayList<StatementNode>();
+        this.localFieldDeclNodes = new ArrayList<FieldDeclNode>();
     }
 
 //    void addType(TypeNode typeNode) {
@@ -624,7 +624,7 @@ class MethodDeclNode extends MemberDeclNode {
         this.paraDeclNodes.add(paraDeclNode);
     }
 
-    void addFieldDecl(FieldDeclNode fielDeclNode) {
+    void addFieldDecl(FieldDeclNode fieldDeclNode) {
         this.localFieldDeclNodes.add(fieldDeclNode);
     }
 
@@ -644,18 +644,13 @@ class MethodDeclNode extends MemberDeclNode {
         return paraDeclNodes;
     }
 
-    ArrayList<StmtNodes> getStmtNodes() {
-        return statNodes;
+    ArrayList<StatementNode> getStmtNodes() {
+        return stmtNodes;
     }
 
     ArrayList<FieldDeclNode> getLocalFieldDeclNodes() {
         return localFieldDeclNodes;
     }
-
-//    void setExMethod() {
-//        stmtNodes           = null;
-//        localFieldDeclNodes = null;
-//    }
 
 }
 
@@ -697,13 +692,13 @@ class VarDeclNode extends ASTNode {
 class ParaDeclNode extends MemberDeclNode {
 
     private final TypeNode    typeNode;
-    private final VarDeclNode varNode;
+    private final VarDeclNode varDeclNode;
 
-    ParaDeclNode() {
+    ParaDeclNode(TypeNode typeNode, VarDeclNode varDeclNode) {
         super("para_decl", FIELD_DECL);
 
-        typeNodes = new ArrayList<TypeNode>();
-        varNodes  = new ArrayList<VarDeclNode>();
+        this.typeNode    = typeNode;
+        this.varDeclNode = varDeclNode;
     }
 
 //    void addType(TypeNode typeNode) {
@@ -718,15 +713,13 @@ class ParaDeclNode extends MemberDeclNode {
         return typeNode;
     }
 
-    VarNode getVarNode() {
-        return varNode;
+    VarDeclNode getVarNode() {
+        return varDeclNode;
     }
 
     void dump() {
         typeNode.dump();
-        for(VarDeclNode varNode: varNodes) {
-            varNode.dump();
-        }
+        varDeclNode.dump();
     }
 
 }
@@ -747,14 +740,14 @@ class ProgramNode extends ASTNode {
 
     private final ArrayList<ImportDeclNode> importDeclNodes;
     private final ArrayList<FieldDeclNode>  fieldDeclNodes;
-    private final ArrayList<MethodDeclNode> methodDeclNodes
+    private final ArrayList<MethodDeclNode> methodDeclNodes;
 
     ProgramNode() {
         super("program", PROGRAM);
 
         importDeclNodes = new ArrayList<ImportDeclNode>();
         fieldDeclNodes  = new ArrayList<FieldDeclNode>();
-        methodDeclNode  = new ArrayList<MethodDeclNode>();
+        methodDeclNodes = new ArrayList<MethodDeclNode>();
     }
 
     void addImportDecl(ImportDeclNode idn) {
@@ -766,7 +759,7 @@ class ProgramNode extends ASTNode {
     }
 
     void addMethodDeclNode(MethodDeclNode mdn) {
-        methodDeclNode.add(mdn);
+        methodDeclNodes.add(mdn);
     }
 
     ArrayList<ImportDeclNode> getImportDeclNodes() {

@@ -120,15 +120,15 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             switch(cstChild.getType()) {
                 case IMPORT_DECL: 
                     ImportDeclNode importDeclNode = importDecl(cstChild);
-                    root.addChild(importDeclNode);
+                    root.addImportDecl(importDeclNode);
                     break;
                 case FIELD_DECL:
                     FieldDeclNode fieldDeclNode = fieldDecl(cstChild);
-                    root.addChild(fieldDeclNode);
+                    root.fieldDecl(fieldDeclNode);
                     break;
                 case METHOD_DECL:
                     MethodDeclNode methodDeclNode = methodDecl(cstChild);
-                    root.addChild(methodDeclNode);
+                    root.methodDecl(methodDeclNode);
                     break;
             }
             cstChild = cstChild.getNextSibling();
@@ -150,7 +150,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         childNode = childNode.getNextSibling();
 
         // AST node
-        ImportDeclNode importDeclNode = new ImportDeclNode(childNode.getText())
+        ImportDeclNode importDeclNode = new ImportDeclNode(childNode.getText());
 
         traceOut(importDeclNode); 
         return importDeclNode;
@@ -170,7 +170,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         // collect necessary info and build AST
         
         // first child is type
-        AST grandChild = child.getFristChild();
+        AST grandChild = childNode.getFristChild();
         TypeNode typeNode = new TypeNode(grandChild.getText(), grandChild.getType());
         type(childNode);
 
@@ -179,7 +179,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         // var declarations
         childNode   = childNode.getNextSibling();
-        while(childNode.getType() != null) {
+        while(childNode != null) {
             // check if is array
             if(childNode.getNextSibling() != null && 
                childNode.getNextSibling().getType() == INTLITERAL) {
@@ -298,7 +298,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             case METHOD_CALL:
                 return callStmt(childNode);
             case TK_if:
-                return = ifStmt(childNode);
+                return ifStmt(childNode);
             case TK_for:
                 return forStmt(childNode);
             case TK_while:
@@ -695,7 +695,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     return tenaryExpr(leftFirstChild, rightFirstChild);
                 // binary operator
                 case BIN_OP:
-                    return binaryOpExpr(leftFirstChild, rightFirstChild, lowPriorityOp)
+                    return binaryOpExpr(leftFirstChild, rightFirstChild, lowPriorityOp);
                 case NOT:
                     return  notExrp(rightFirstChild);
                 case NEG:
@@ -878,7 +878,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
     }
 
-    BinOpExprNode binOpExpr(AST leftFirstChild, AST rightFirstChild, AST operator) {
+    BinopExprNode binOpExpr(AST leftFirstChild, AST rightFirstChild, AST operator) {
         traceIn(operator);
 
         // AST
@@ -903,7 +903,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         leftExpr  = findExpr(leftLowPriorityOp, leftL, rightL);
         rightExpr = findExpr(rightLowPriorityOp, leftR, rightR);
 
-        binopExprNode = new(operator, leftExpr, rightExpr);
+        binopExprNode = new BinopExprNode(operator, leftExpr, rightExpr);
          
         traceOut(null); 
         return binopExprNode;
@@ -945,7 +945,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
     LenExprNode lenExpr(AST firstChild) {
         // "len"
-        traceIn(firstChild)
+        traceIn(firstChild);
 
         // AST
         LenExprNode lenExprNode;
@@ -971,4 +971,4 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             return new StringLiteralNode(cst.getText());
         }
     }
-
+}
