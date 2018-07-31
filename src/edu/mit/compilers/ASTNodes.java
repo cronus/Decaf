@@ -463,7 +463,7 @@ class ForStmtNode extends StatementNode {
         this.stmtNodes        = new ArrayList<StatementNode>();
     }
 
-    void addField(FieldDeclNode fn) {
+    void addFieldDecl(FieldDeclNode fn) {
         fieldDeclNodes.add(fn);
     }
 
@@ -487,7 +487,7 @@ class WhileStmtNode extends StatementNode {
         this.stmtNodes      = new ArrayList<StatementNode>();
     }
 
-    void addField(FieldDeclNode fn) {
+    void addFieldDecl(FieldDeclNode fn) {
         fieldDeclNodes.add(fn);
     }
 
@@ -726,8 +726,13 @@ class ParaDeclNode extends MemberDeclNode {
 
 class TypeNode extends ASTNode {
 
+    private final String name;
+    private int    type;
     TypeNode(String name, int type) {
-        super(name, type);
+        super("type", TYPE);
+
+        this.name = name;
+        this.type = type;
     }
 
     void dump() {
@@ -754,11 +759,11 @@ class ProgramNode extends ASTNode {
         importDeclNodes.add(idn);
     }
 
-    void addFieldDeclNode(FieldDeclNode fdn) {
+    void addFieldDecl(FieldDeclNode fdn) {
         fieldDeclNodes.add(fdn);
     }
 
-    void addMethodDeclNode(MethodDeclNode mdn) {
+    void addMethodDecl(MethodDeclNode mdn) {
         methodDeclNodes.add(mdn);
     }
 
