@@ -311,9 +311,10 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             default:
                 System.out.println("not expected statement node");
                 System.exit(1);
+                return null;
         }
 
-        traceOut(null); 
+        //traceOut(null); 
     }
 
     AssignStmtNode assign(AST locationCST) {
@@ -384,8 +385,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             return calloutStmt(childNode);
         }
 
-        traceOut(null); 
-        //return astNode;
+        //traceOut(null); 
     }
 
     MethodCallStmtNode methodCallStmt(AST methodName) {
@@ -622,14 +622,14 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
     void appendSibling(AST firstSibling, AST lastSibling) {
         AST sibling = firstSibling;
-        AST prevSibling;
+        AST prevSibling = null;
 
         while(sibling != null) {
             prevSibling = sibling;
             sibling = sibling.getNextSibling(); 
         }
 
-        if(lastSibling != null) {
+        if(prevSibling != null) {
             prevSibling.setNextSibling(lastSibling);
         } else {
             firstSibling = lastSibling;
@@ -707,6 +707,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                 default:
                     System.out.println("not exptected operator!");
                     System.exit(1);
+                    return null;
 
             }
         } else {
@@ -722,6 +723,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                 default:
                     System.out.println("not exptected operator!");
                     System.exit(1);
+                    return null;
             }
         }
 
@@ -785,8 +787,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             return calloutExpr(childNode);
         }
 
-        traceOut(null); 
-        //return astNode;
+        //traceOut(null); 
     }
 
     MethodCallExprNode methodCallExpr(AST methodName) {
@@ -842,7 +843,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         
         // CST
         AST trueFirstChild         = rightFirstChild;
-        AST falseFirstChild;
+        AST falseFirstChild        = null;
 
         AST conditionLowPriorityOp = null;
         AST conditionLeft          = null;
@@ -871,7 +872,9 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         conditionLowPriorityOp = findLowestOp(leftFirstChild, conditionLeft, conditionRight);
         trueLowPriorityOp      = findLowestOp(trueFirstChild, trueLeft, trueRight);
-        falseLowPriorityOp     = findLowestOp(falseFirstChild, falseLeft, falseRight);
+        if(falseFirstChild != null) {
+            falseLowPriorityOp     = findLowestOp(falseFirstChild, falseLeft, falseRight);
+        }
 
         conditionExprNode = findExpr(conditionLowPriorityOp, conditionLeft, conditionRight);
         trueExprNode      = findExpr(trueLowPriorityOp, trueLeft, trueRight);
