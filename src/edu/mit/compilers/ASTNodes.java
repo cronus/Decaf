@@ -199,6 +199,25 @@ class LenExprNode extends ExpressionNode {
     }
 }
 
+class TenaryExprNode extends ExpressionNode {
+
+    private ExpressionNode conditionExprNode;
+    private ExpressionNode trueExprNode;
+    private ExpressionNode falseExprNode;
+
+    TenaryExprNode(ExpressionNode conditionExprNode,
+                   ExpressionNode trueExprNode,
+                   ExpressionNode falseExprNode) {
+        super("tenary", TENARY);
+
+        this.conditionExprNode = conditionExprNode;
+        this.trueExprNode      = trueExprNode;
+        this.falseExprNode     = falseExprNode;
+    }
+
+
+}
+
 abstract class StatementNode extends ASTNode {
 
     StatementNode(String name, int type) {

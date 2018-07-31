@@ -593,37 +593,105 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         return returnNode;
     }
 
+
+    AST findLowestOp(AST cst) {
+    }
+
     ExpressionNode expr(AST cst) {
         // "expr"
         traceIn(cst);
 
-        //ASTNode astNode = null;
-        AST childNode = cst.getFirstChild();
+        // AST
+        ExpressionNode currentExprNode;
+        ExpressionNode lastExprNode;
 
-        switch(childNode.getType()) {
-            case LOCATION:
-                return location(childNode);
-            case METHOD_CALL:
-                return callExpr(childNode);
-            case LITERAL:
-                return literalExpr(childNode);
-            case EXPR:
-                return expr(childNode);
-            case BIN_OP:
-                return binOpExpr(childNode);
-            case MINUS:
-                return minusExpr(childNode);
-            case NOT:
-                return notExpr(childNode);
-            case TK_len:
-                return lenExpr(childNode);
-            default:
-                traceIn(childNode);
-                traceOut(null);
+        // CST nodes
+        AST childNode = cst.getFirstChild();
+        AST lastChild = null;
+        ArrayList<AST> lhs = new ArrayList<AST>();
+        ArrayList<AST> rhs = new ArrayList<AST>();
+        AST lowPriorityOp  = null;
+
+        while(childNode != null) {
+          
+            lastExprNode = currentExprNode;
+
+            switch(childNode.getType()) {
+                // find lowest priority
+                case QUESTION:
+                    // TODO
+                    if(rhs.size() != 0) {
+                        lhs.add(lowPriorityOp);
+                        for(AST cst: rhs) {
+                            lhs.add(cst);
+                        }
+                    }
+                    lowPrioirtyOp = childNode;
+                    break;
+                case LOCATION:
+                case METHOD_CALL:
+                case LITERAL:
+                case EXPR:
+                    if(lowPriorityOp == null) {
+                        lhs.add(childNode);
+                    } else {
+                        rhs.add(childNode);
+                    }
+                    break;
+                case MINUS:
+                case NOT:
+                    if(lowPriorityOp == null) {
+                        lowPriorityOp = childNode;
+                    }
+                    break;
+                case BIN_OP:
+                    int operator = childNode.getFirstChild().getFirstChild().getType();
+                    
+                    // TODO: use a hash table for priority
+                    if(lowPriorityOp == null) {
+                        lowPriorityOp = childNode;
+                    } else if(priorityHT(lowProrityOp) > priorityHT(childNode)) {
+                        lowPriorityOp = childNode;
+                        lhs.add(lowPriorityOp);
+                        for(AST cst: rhs) {
+                            lhs.add(cst);
+                        }
+                    } else {
+                        rhs.add(childNode);
+                    }
+                    
+                    break;
+                case TK_len:
+                    currentExprNode = lenExpr(childNode);
+                    break;
+                default:
+                    traceIn(childNode);
+                    traceOut(null);
+            }
+
+            lastChild = childNode;
+            childNode = childNode.getNextSibling();
         }
 
-        traceOut(null); 
-        //return astNode;
+        switch(lowPriorityOp.getType()) {
+            // tenery operator
+            case QUESTION:
+                return questionExpr(lhs, rhs);
+            // binary operator
+            case BIN_OP:
+                return binaryOpExpr(lhs, rhs, lowPriorityOp)
+            case NOT:
+                return  notExrp(rhs);
+            case NEG:
+                return negExpr(rhs);
+            default:
+                System.out.println("not exptected operator!");
+                System.exit(1);
+
+        }
+
+        //traceOut(null); 
+        //return currentNode;
     }
 
     LocationNode location(AST cstNode) {
@@ -708,7 +776,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         return calloutExprNode;
     }
 
-    BinOpExprNode binOpExpr(AST cstNode) {
+    BinOpExprNode binOpExpr(ArrayList<AST> lhs, ArrayList<AST> rhs, AST operator) {
         traceIn(cstNode);
 
         //ASTNode astNode = null;
@@ -718,128 +786,133 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         //return astNode;
     }
 
-    MinusExprNode minusExpr(AST cst) {
+    MinusExprNode minusExpr(ArrayList<AST> rhs) {
     }
 
-    NotExprNode notExpr(AST cst) {
+    NotExprNode notExpr(ArrayList<AST> rhs) {
     }
 
-    void importArg(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                case EXPR:
-                    expr(childNode);
-                    break;
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
+    BinopExprNode binopExpr(ArrayList<AST> lhs, ArrayList<AST> rhs, AST operatorCST) {
     }
 
 
-    void arithOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
 
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
+//    void importArg(AST cstNode, ASTNode astNode) {
+//        traceIn(cstNode);
+//
+//        //ASTNode astNode = null;
+//        AST childNode   = cstNode.getFirstChild();
+//
+//        while(childNode != null) {
+//            switch(childNode.getType()) {
+//                case EXPR:
+//                    expr(childNode);
+//                    break;
+//                default:
+//                    traceIn(childNode);
+//                    traceOut(null);
+//            }
+//            childNode = childNode.getNextSibling();
+//        }
+//
+//        traceOut(null); 
+//        //return astNode;
+//    }
 
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
 
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void relOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void eqOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void condOp(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
-
-    void boolLiteral(AST cstNode, ASTNode astNode) {
-        traceIn(cstNode);
-
-        //ASTNode astNode = null;
-        AST childNode   = cstNode.getFirstChild();
-
-        while(childNode != null) {
-            switch(childNode.getType()) {
-                default:
-                    traceIn(childNode);
-                    traceOut(null);
-            }
-            childNode = childNode.getNextSibling();
-        }
-
-        traceOut(null); 
-        //return astNode;
-    }
+//    void arithOp(AST cstNode, ASTNode astNode) {
+//        traceIn(cstNode);
+//
+//        //ASTNode astNode = null;
+//        AST childNode   = cstNode.getFirstChild();
+//
+//        while(childNode != null) {
+//            switch(childNode.getType()) {
+//                default:
+//                    traceIn(childNode);
+//                    traceOut(null);
+//            }
+//            childNode = childNode.getNextSibling();
+//        }
+//
+//        traceOut(null); 
+//        //return astNode;
+//    }
+//
+//    void relOp(AST cstNode, ASTNode astNode) {
+//        traceIn(cstNode);
+//
+//        //ASTNode astNode = null;
+//        AST childNode   = cstNode.getFirstChild();
+//
+//        while(childNode != null) {
+//            switch(childNode.getType()) {
+//                default:
+//                    traceIn(childNode);
+//                    traceOut(null);
+//            }
+//            childNode = childNode.getNextSibling();
+//        }
+//
+//        traceOut(null); 
+//        //return astNode;
+//    }
+//
+//    void eqOp(AST cstNode, ASTNode astNode) {
+//        traceIn(cstNode);
+//
+//        //ASTNode astNode = null;
+//        AST childNode   = cstNode.getFirstChild();
+//
+//        while(childNode != null) {
+//            switch(childNode.getType()) {
+//                default:
+//                    traceIn(childNode);
+//                    traceOut(null);
+//            }
+//            childNode = childNode.getNextSibling();
+//        }
+//
+//        traceOut(null); 
+//        //return astNode;
+//    }
+//
+//    void condOp(AST cstNode, ASTNode astNode) {
+//        traceIn(cstNode);
+//
+//        //ASTNode astNode = null;
+//        AST childNode   = cstNode.getFirstChild();
+//
+//        while(childNode != null) {
+//            switch(childNode.getType()) {
+//                default:
+//                    traceIn(childNode);
+//                    traceOut(null);
+//            }
+//            childNode = childNode.getNextSibling();
+//        }
+//
+//        traceOut(null); 
+//        //return astNode;
+//    }
+//
+//    void boolLiteral(AST cstNode, ASTNode astNode) {
+//        traceIn(cstNode);
+//
+//        //ASTNode astNode = null;
+//        AST childNode   = cstNode.getFirstChild();
+//
+//        while(childNode != null) {
+//            switch(childNode.getType()) {
+//                default:
+//                    traceIn(childNode);
+//                    traceOut(null);
+//            }
+//            childNode = childNode.getNextSibling();
+//        }
+//
+//        traceOut(null); 
+//        //return astNode;
+//    }
 
 }
