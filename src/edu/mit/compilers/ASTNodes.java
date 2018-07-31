@@ -66,18 +66,45 @@ abstract class LiteralNode extends ExpressionNode {
 
 class IntLiteralNode extends LiteralNode {
 
-    IntLiteralNode(String name) {
-        super(name, INTLITERAL);
+    private final int num;
+
+    IntLiteralNode(int num) {
+        super("int_literal", INTLITERAL);
+        this.num = num;
     }
 
 }
 
 class BoolLiteralNode extends LiteralNode {
 
-    BoolLiteralNode(String name, int type) {
-        super(name, type);
+    private final boolean value;
+
+    BoolLiteralNode(boolean value) {
+        super("bool_literal", BOOLLITERAL);
+
+        this.value = value;
     }
 
+}
+
+class CharLiteralNode extends LiteralNode {
+
+    private final char c;
+    CharLiteralNode(char c) {
+        super("char_literal", CHARLITERAL);
+
+        this.c = c;
+    }
+}
+
+class StringLiteralNode extends LiteralNode {
+    
+    private final String content;
+    StringLiteralNode(String content) {
+        super("string_literal", STRINGLITERAL);
+
+        this.content = content;
+    }
 }
 
 class LocationNode extends ExpressionNode {
@@ -179,23 +206,33 @@ class BinopExprNode extends ExpressionNode {
 
 class MinusExprNode extends ExpressionNode {
 
+    private final ExpressionNode expr;
 
-    MinusExprNode() {
+    MinusExprNode(ExpressionNode expr) {
         super("minum", MINUS);
+
+        this.expr = expr;
     }
 }
 
 class NotExprNode extends ExpressionNode {
+
+    private final ExpressionNode expr;
     
     NotExprNode() {
         super("not", NOT);
+
+        this.expr = expr;
     }
 }
 
 class LenExprNode extends ExpressionNode {
     
-    LenExprNode() {
+    private final String id;
+    LenExprNode(String id) {
         super("len", TK_len);
+
+        this.id = id;
     }
 }
 
