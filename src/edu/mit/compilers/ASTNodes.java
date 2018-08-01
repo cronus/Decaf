@@ -110,17 +110,17 @@ class StringLiteralNode extends LiteralNode {
 class LocationNode extends ExpressionNode {
     
     private final String name;
-    private final int index;
+    private final ExpressionNode index;
     private final boolean isArrayElement;
 
     LocationNode(String name) {
         super("location", LOCATION);
         this.name           = name;
-        this.index          = -1;
+        this.index          = null;
         this.isArrayElement = false;
     }
 
-    LocationNode(String name, int index) {
+    LocationNode(String name, ExpressionNode index) {
         super("location", LOCATION);
         this.name           = name;
         this.index          = index;
@@ -135,7 +135,7 @@ class LocationNode extends ExpressionNode {
         return name;
     }
 
-    int getLocationIndex() {
+    ExpressionNode getLocationIndex() {
         return index;
     }
 }

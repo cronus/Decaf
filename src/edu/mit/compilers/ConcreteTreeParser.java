@@ -640,16 +640,16 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         return firstSibling;
     }
 
-    AST findLowestOp(AST childNode, AST leftFirstChild, AST rightFirstChild) {
+    CSTTree findLowestOp(AST childNode) {
         
         if(debug) {
             System.out.println("func: findLowestOp");
             System.out.println("\tchildNode: " + childNode);
-            System.out.println("\tleftFirstChild: " + leftFirstChild);
-            System.out.println("\trightFirstChild: " + rightFirstChild);
         }
     
-        AST lowPriorityOp = null;
+        AST lowPriorityOp   = null;
+        AST leftFirstChild  = null;
+        AST rightFirstChild = null;
 
         while(childNode != null) {
           
@@ -707,7 +707,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             System.out.println("\tleftFirstChild: " + leftFirstChild);
             System.out.println("\trightFirstChild: " + rightFirstChild);
         }
-        return lowPriorityOp;
+        return new CSTTree(lowPriorityOp, leftFirstChild, rightFirstChild);
     }
 
     ExpressionNode findExpr(AST lowPriorityOp, AST leftFirstChild, AST rightFirstChild) {
@@ -764,11 +764,17 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
 
         // CST nodes
         AST childNode = cst.getFirstChild();
-        AST leftFirstChild  = null;
-        AST rightFirstChild = null;
+        AST leftFirstChild;
+        AST rightFirstChild;
         AST lowPriorityOp;
 
-        lowPriorityOp = findLowestOp(childNode, leftFirstChild, rightFirstChild);
+        CSTTree lowOp;
+
+        lowOp = findLowestOp(childNode);
+
+        lowPriorityOp   = lowOp.getRoot();
+        leftFirstChild  = lowOp.getLhs();
+        rightFirstChild = lowOp.getRhs();
 
         System.out.println(lowPriorityOp);
         System.out.println(leftFirstChild);
@@ -791,9 +797,13 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         AST childNode   = cstNode.getFirstChild();
 
         if(cstNode.getNumberOfChildren() == 1) {
+            System.out.println("aaa");
             locationNode = new LocationNode(childNode.getText());
+            System.out.println("aaa");
         } else {
-            locationNode = new LocationNode(childNode.getText(), Integer.parseInt(childNode.getNextSibling().getText()));
+            ExpressionNode indexExprNode = expr(childNode.getNextSibling());
+            locationNode = new LocationNode(childNode.getText(), indexExprNode);
+            System.out.println("bbb");
         }
 
         traceOut(null); 
@@ -886,6 +896,10 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         AST falseLeft              = null;
         AST falseRight             = null;
 
+        CSTTree conditionLowOp;
+        CSTTree trueLowOp;
+        CSTTree falseLowOp;
+
         // find true expr and false expr, separated by :
         AST rightChild = rightFirstChild;
         AST prevChild  = null;
@@ -899,10 +913,24 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             rightChild = rightChild.getNextSibling();
         }
 
-        conditionLowPriorityOp = findLowestOp(leftFirstChild, conditionLeft, conditionRight);
-        trueLowPriorityOp      = findLowestOp(trueFirstChild, trueLeft, trueRight);
+        conditionLowOp = findLowestOp(leftFirstChild);
+        
+        conditionLowPriorityOp = conditionLowOp.getRoot();
+        conditionLeft          = conditionLowOp.getLhs();
+        conditionRight         = conditionLowOp.getRhs();
+
+        trueLowOp      = findLowestOp(trueFirstChild);
+
+        trueLowPriorityOp = trueLowOp.getRoot();
+        trueLeft          = trueLowOp.getLhs();
+        trueRight         = trueLowOp.getRhs();
+
         if(falseFirstChild != null) {
-            falseLowPriorityOp     = findLowestOp(falseFirstChild, falseLeft, falseRight);
+            falseLowOp     = findLowestOp(falseFirstChild);
+
+            falseLowPriorityOp = falseLowOp.getRoot();
+            falseLeft          = falseLowOp.getLhs();
+            falseRight         = falseLowOp.getRhs();
         }
 
         conditionExprNode = findExpr(conditionLowPriorityOp, conditionLeft, conditionRight);
@@ -931,10 +959,21 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         AST leftR              = null;
         AST rightR             = null;
 
+        CSTTree leftLowOp;
+        CSTTree rightLowOp;
+
         int operator = operatorCST.getFirstChild().getFirstChild().getType();
 
-        leftLowPriorityOp = findLowestOp(leftFirstChild, leftL, rightL);
-        rightLowPriorityOp = findLowestOp(rightFirstChild, leftR, rightR);
+        leftLowOp  = findLowestOp(leftFirstChild);
+        rightLowOp = findLowestOp(rightFirstChild);
+
+        leftLowPriorityOp = leftLowOp.getRoot();
+        leftL             = leftLowOp.getLhs();
+        leftR             = leftLowOp.getRhs();
+
+        rightLowPriorityOp = rightLowOp.getRoot();
+        leftR              = rightLowOp.getLhs();
+        rightR             = rightLowOp.getRhs();
 
         leftExpr  = findExpr(leftLowPriorityOp, leftL, rightL);
         rightExpr = findExpr(rightLowPriorityOp, leftR, rightR);
@@ -1006,5 +1045,30 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         } else {
             return new StringLiteralNode(cst.getText());
         }
+    }
+}
+
+class CSTTree {
+
+    private AST root;
+    private AST lhs;
+    private AST rhs;
+
+    CSTTree(AST root, AST lhs, AST rhs) {
+        this.root = root;
+        this.lhs  = lhs;
+        this.rhs  = rhs;
+    }
+
+    AST getRoot() {
+        return root;
+    }
+
+    AST getLhs() {
+        return lhs;
+    }
+
+    AST getRhs() {
+        return rhs;
     }
 }
