@@ -620,7 +620,7 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
     }
 
 
-    void appendSibling(AST firstSibling, AST lastSibling) {
+    AST appendSibling(AST firstSibling, AST lastSibling) {
         AST sibling = firstSibling;
         AST prevSibling = null;
 
@@ -634,9 +634,20 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         } else {
             firstSibling = lastSibling;
         }
+        System.out.println("func: appendSibling: ");
+        System.out.println("\tfirstSibling: " + firstSibling);
+
+        return firstSibling;
     }
 
     AST findLowestOp(AST childNode, AST leftFirstChild, AST rightFirstChild) {
+        
+        if(debug) {
+            System.out.println("func: findLowestOp");
+            System.out.println("\tchildNode: " + childNode);
+            System.out.println("\tleftFirstChild: " + leftFirstChild);
+            System.out.println("\trightFirstChild: " + rightFirstChild);
+        }
     
         AST lowPriorityOp = null;
 
@@ -658,10 +669,12 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                 case ID:
                 case TK_len:
                     if(lowPriorityOp == null) {
-                        appendSibling(leftFirstChild, childNode);
+                        leftFirstChild = appendSibling(leftFirstChild, childNode);
                     } else {
-                        appendSibling(rightFirstChild, childNode);
+                        rightFirstChild = appendSibling(rightFirstChild, childNode);
                     }
+                    //System.out.println(leftFirstChild);
+                    //System.out.println(rightFirstChild);
                     break;
                 case MINUS:
                 case NOT:
@@ -688,10 +701,23 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
             childNode = childNode.getNextSibling();
         }
 
+        if(debug) {
+            System.out.println("func: findLowestOp out");
+            System.out.println("\tlowPriorityOp: " + lowPriorityOp);
+            System.out.println("\tleftFirstChild: " + leftFirstChild);
+            System.out.println("\trightFirstChild: " + rightFirstChild);
+        }
         return lowPriorityOp;
     }
 
     ExpressionNode findExpr(AST lowPriorityOp, AST leftFirstChild, AST rightFirstChild) {
+        
+        if(debug) {
+            System.out.println("func: findExpr");
+            System.out.println("\tlowPriorityOp: " + lowPriorityOp);
+            System.out.println("\tleftFirstChild: " + leftFirstChild);
+            System.out.println("\trightFirstChild: " + rightFirstChild);
+        }
         if(lowPriorityOp != null) {
             switch(lowPriorityOp.getType()) {
                 // tenery operator
@@ -726,7 +752,6 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
                     return null;
             }
         }
-
     }
 
     ExpressionNode expr(AST cst) {
@@ -744,6 +769,10 @@ class ConcreteTreeParser implements DecafParserTokenTypes {
         AST lowPriorityOp;
 
         lowPriorityOp = findLowestOp(childNode, leftFirstChild, rightFirstChild);
+
+        System.out.println(lowPriorityOp);
+        System.out.println(leftFirstChild);
+        System.out.println(rightFirstChild);
  
         return findExpr(lowPriorityOp, leftFirstChild, rightFirstChild);
 
