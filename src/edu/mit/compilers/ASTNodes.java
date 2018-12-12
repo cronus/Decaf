@@ -38,7 +38,6 @@ abstract class ASTNode implements DecafParserTokenTypes {
     }
 
     abstract void dump();
-    
 }
 
 
